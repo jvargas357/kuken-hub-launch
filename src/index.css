@@ -135,3 +135,17 @@
   background-image: radial-gradient(circle, hsl(var(--muted-foreground) / 0.08) 1px, transparent 1px);
   background-size: 32px 32px;
 }
+
+/* Mobile: show admin controls on tap (no hover) */
+@media (hover: none) {
+  .glass-card .group-hover\:opacity-100 {
+    opacity: 1 !important;
+  }
+}
+
+/* Touch: disable default long-press context menu in drag mode */
+.drag-mode-active {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
