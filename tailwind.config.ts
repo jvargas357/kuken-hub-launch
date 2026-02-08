@@ -15,6 +15,7 @@ export default {
     extend: {
       fontFamily: {
         mono: ["JetBrains Mono", "monospace"],
+        display: ["Barlow Semi Condensed", "sans-serif"],
         sans: ["Inter", "sans-serif"],
       },
       colors: {

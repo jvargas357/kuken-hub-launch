@@ -13,7 +13,7 @@ const defaultServices = [
   {
     name: "Jellyfin",
     description: "Media server — movies, shows & music streaming",
-    url: "https://jellyfin.kuken.ffse",
+    url: "https://jellyfin.jambiya.me",
     icon: <Film className="h-6 w-6" />,
     glowClass: "glow-jellyfin",
     accentColor: "jellyfin",
@@ -21,7 +21,7 @@ const defaultServices = [
   {
     name: "Vaultwarden",
     description: "Password manager — secure credential vault",
-    url: "https://vault.kuken.ffse",
+    url: "https://vault.jambiya.me",
     icon: <ShieldCheck className="h-6 w-6" />,
     glowClass: "glow-vaultwarden",
     accentColor: "vaultwarden",
@@ -29,7 +29,7 @@ const defaultServices = [
   {
     name: "Nextcloud",
     description: "Cloud storage — files, calendar & contacts",
-    url: "https://cloud.kuken.ffse",
+    url: "https://cloud.jambiya.me",
     icon: <Cloud className="h-6 w-6" />,
     glowClass: "glow-nextcloud",
     accentColor: "nextcloud",
@@ -58,10 +58,10 @@ const Index = () => {
               <Server className="h-5 w-5 text-primary" />
             </div>
             <span className="font-mono text-sm text-muted-foreground tracking-widest uppercase">
-              kuken.ffse
+              jambiya.me
             </span>
           </div>
-          <h1 className="font-mono text-3xl font-bold tracking-tight text-foreground md:text-4xl">
+          <h1 className="font-display text-3xl font-bold tracking-tight text-foreground md:text-4xl">
             Dashboard
           </h1>
           <p className="text-muted-foreground max-w-md">
@@ -114,7 +114,7 @@ const Index = () => {
           className="mt-20 text-center"
         >
           <p className="font-mono text-xs text-muted-foreground/50">
-            *.kuken.ffse
+            *.jambiya.me
           </p>
         </motion.footer>
       </div>

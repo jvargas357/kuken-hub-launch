@@ -40,9 +40,9 @@ const CustomServiceCard = ({
         href={url}
         target="_blank"
         rel="noopener noreferrer"
-        initial={{ opacity: 0, y: 24 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: index * 0.1, ease: [0.23, 1, 0.32, 1] }}
+        initial={{ opacity: 0, y: 20, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.35, delay: index * 0.07, ease: [0.16, 1, 0.3, 1] }}
         whileHover={{ y: -4, scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
         className="glass-card group relative flex flex-col items-start gap-4 rounded-xl p-6 transition-all duration-300 cursor-pointer hover:border-primary/30"
@@ -73,7 +73,7 @@ const CustomServiceCard = ({
         </div>
 
         <div className="space-y-1">
-          <h3 className="font-mono text-lg font-semibold text-foreground">{name}</h3>
+          <h3 className="font-display text-lg font-semibold text-foreground">{name}</h3>
           <p className="text-sm text-muted-foreground leading-relaxed">{description}</p>
         </div>
 
