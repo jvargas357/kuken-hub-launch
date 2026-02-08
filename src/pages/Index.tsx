@@ -1,47 +1,38 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Film, Cloud, ShieldCheck, Server } from "lucide-react";
+import { Server, Plus } from "lucide-react";
 import ServiceCard from "@/components/ServiceCard";
 import AddServiceCard from "@/components/AddServiceCard";
-import AddServiceDialog from "@/components/AddServiceDialog";
-import CustomServiceCard from "@/components/CustomServiceCard";
-import { getIconByName } from "@/components/AddServiceDialog";
+import ServiceDialog from "@/components/ServiceDialog";
+import { getIconByName } from "@/components/ServiceDialog";
 import { useAutheliaUser } from "@/hooks/useAutheliaUser";
-import { useCustomServices } from "@/hooks/useCustomServices";
-
-const defaultServices = [
-  {
-    name: "Jellyfin",
-    description: "Media server — movies, shows & music streaming",
-    url: "https://jellyfin.jambiya.me",
-    icon: <Film className="h-6 w-6" />,
-    glowClass: "glow-jellyfin",
-    accentColor: "jellyfin",
-  },
-  {
-    name: "Vaultwarden",
-    description: "Password manager — secure credential vault",
-    url: "https://vault.jambiya.me",
-    icon: <ShieldCheck className="h-6 w-6" />,
-    glowClass: "glow-vaultwarden",
-    accentColor: "vaultwarden",
-  },
-  {
-    name: "Nextcloud",
-    description: "Cloud storage — files, calendar & contacts",
-    url: "https://cloud.jambiya.me",
-    icon: <Cloud className="h-6 w-6" />,
-    glowClass: "glow-nextcloud",
-    accentColor: "nextcloud",
-  },
-];
+import { useServices } from "@/hooks/useServices";
+import type { Service } from "@/hooks/useServices";
 
 const Index = () => {
   const { isAdmin, loading } = useAutheliaUser();
-  const { services: customServices, addService, removeService } = useCustomServices();
+  const { services, loaded, addService, updateService, removeService, moveService } = useServices();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [editingService, setEditingService] = useState<Service | null>(null);
 
-  const totalDefaultCount = defaultServices.length;
+  const handleEdit = (service: Service) => {
+    setEditingService(service);
+    setDialogOpen(true);
+  };
+
+  const handleDialogClose = (open: boolean) => {
+    setDialogOpen(open);
+    if (!open) setEditingService(null);
+  };
+
+  const handleSubmit = (data: Omit<Service, "id" | "order">) => {
+    if (editingService) {
+      updateService(editingService.id, data);
+    } else {
+      addService(data);
+    }
+    setEditingService(null);
+  };
 
   return (
     <div className="ambient-bg dot-grid min-h-screen">
@@ -80,26 +71,33 @@ const Index = () => {
             Services
           </motion.p>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {defaultServices.map((service, i) => (
-              <ServiceCard key={service.name} {...service} index={i} />
-            ))}
-
-            {customServices.map((service, i) => (
-              <CustomServiceCard
-                key={service.id}
-                name={service.name}
-                description={service.description}
-                url={service.url}
-                icon={getIconByName(service.iconName)}
-                index={totalDefaultCount + i}
-                isAdmin={isAdmin}
-                onRemove={() => removeService(service.id)}
-              />
-            ))}
+            {loaded &&
+              services.map((service, i) => (
+                <ServiceCard
+                  key={service.id}
+                  name={service.name}
+                  description={service.description}
+                  url={service.url}
+                  icon={getIconByName(service.iconName)}
+                  accentColor={service.accentColor}
+                  glowClass={service.glowClass}
+                  size={service.size}
+                  index={i}
+                  isAdmin={isAdmin}
+                  isFirst={i === 0}
+                  isLast={i === services.length - 1}
+                  pythonEndpoint={service.pythonEndpoint}
+                  pythonScript={service.pythonScript}
+                  onRemove={() => removeService(service.id)}
+                  onEdit={() => handleEdit(service)}
+                  onMoveUp={() => moveService(service.id, "up")}
+                  onMoveDown={() => moveService(service.id, "down")}
+                />
+              ))}
 
             {!loading && isAdmin && (
               <AddServiceCard
-                index={totalDefaultCount + customServices.length}
+                index={services.length}
                 onClick={() => setDialogOpen(true)}
               />
             )}
@@ -119,10 +117,11 @@ const Index = () => {
         </motion.footer>
       </div>
 
-      <AddServiceDialog
+      <ServiceDialog
         open={dialogOpen}
-        onOpenChange={setDialogOpen}
-        onAdd={addService}
+        onOpenChange={handleDialogClose}
+        onSubmit={handleSubmit}
+        editingService={editingService}
       />
     </div>
   );
