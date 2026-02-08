@@ -124,13 +124,13 @@ const ServiceCard = ({
 
       {/* Background accent orb — large diffused glow */}
       <div
-        className="absolute -top-8 -right-8 h-32 w-32 rounded-full opacity-0 group-hover:opacity-[0.08] transition-opacity duration-700 pointer-events-none blur-2xl"
+        className="absolute -top-8 -right-8 h-32 w-32 rounded-full opacity-[0.04] sm:opacity-0 group-hover:opacity-[0.08] transition-opacity duration-700 pointer-events-none blur-2xl"
         style={{ backgroundColor: colorStyle || "hsl(var(--primary))" }}
       />
 
       {/* Bottom accent bar */}
       <div
-        className="absolute bottom-0 left-4 right-4 h-[1px] rounded-full transition-opacity duration-500 opacity-0 group-hover:opacity-40"
+        className="absolute bottom-0 left-4 right-4 h-[1px] rounded-full transition-opacity duration-500 opacity-20 sm:opacity-0 group-hover:opacity-40"
         style={{
           background: `linear-gradient(90deg, transparent, ${colorStyle || "hsl(var(--primary))"}, transparent)`,
         }}

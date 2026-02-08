@@ -111,7 +111,7 @@
   border-color: hsl(var(--glass-highlight) / 0.7);
 }
 
-/* Glow effects per service */
+/* Glow effects per service — desktop hover */
 .glow-jellyfin:hover {
   box-shadow: 0 0 30px -5px hsl(var(--jellyfin-glow) / 0.3), 
               0 0 60px -15px hsl(var(--jellyfin-glow) / 0.15);
@@ -130,8 +130,36 @@
   border-color: hsl(var(--vaultwarden) / 0.4) !important;
 }
 
-/* Mobile: show admin controls on tap (no hover) */
+/* Mobile: always-on subtle glow + active press glow */
 @media (hover: none) {
+  .glow-jellyfin {
+    box-shadow: 0 0 20px -8px hsl(var(--jellyfin-glow) / 0.15);
+    border-color: hsl(var(--jellyfin) / 0.2) !important;
+  }
+  .glow-jellyfin:active {
+    box-shadow: 0 0 30px -5px hsl(var(--jellyfin-glow) / 0.35);
+    border-color: hsl(var(--jellyfin) / 0.45) !important;
+  }
+
+  .glow-nextcloud {
+    box-shadow: 0 0 20px -8px hsl(var(--nextcloud-glow) / 0.15);
+    border-color: hsl(var(--nextcloud) / 0.2) !important;
+  }
+  .glow-nextcloud:active {
+    box-shadow: 0 0 30px -5px hsl(var(--nextcloud-glow) / 0.35);
+    border-color: hsl(var(--nextcloud) / 0.45) !important;
+  }
+
+  .glow-vaultwarden {
+    box-shadow: 0 0 20px -8px hsl(var(--vaultwarden-glow) / 0.15);
+    border-color: hsl(var(--vaultwarden) / 0.2) !important;
+  }
+  .glow-vaultwarden:active {
+    box-shadow: 0 0 30px -5px hsl(var(--vaultwarden-glow) / 0.35);
+    border-color: hsl(var(--vaultwarden) / 0.45) !important;
+  }
+
+  /* Show admin controls without hover */
   .glass-card .group-hover\:opacity-100 {
     opacity: 1 !important;
   }
