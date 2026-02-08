@@ -15,7 +15,7 @@ const AddServiceCard = ({ index, onClick }: AddServiceCardProps) => {
       transition={{ duration: 0.35, delay: index * 0.07, ease: [0.16, 1, 0.3, 1] }}
       whileHover={{ y: -4, scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
-      className="glass-card group relative flex flex-col items-center justify-center gap-3 rounded-xl p-6 transition-all duration-300 cursor-pointer min-h-[180px] border-dashed !border-2 !border-muted-foreground/20 hover:!border-primary/40"
+      className="glass-card group relative flex flex-col items-center justify-center gap-3 rounded-xl p-6 transition-all duration-300 cursor-pointer min-h-[140px] border-dashed !border-2 !border-muted-foreground/20 hover:!border-primary/40"
     >
       <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary group-hover:bg-primary/20 transition-colors duration-300">
         <Plus className="h-6 w-6" />
