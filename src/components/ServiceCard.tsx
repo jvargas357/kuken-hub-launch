@@ -214,7 +214,7 @@ const ServiceCard = ({
 
   const innerClassName = `glass-card ${glowClass || ""} group relative flex flex-col items-start rounded-xl px-5 py-4 transition-all duration-200 ${
     isInDragMode ? "cursor-grab active:cursor-grabbing" : "cursor-pointer"
-  } hover:border-primary/30 w-full h-full overflow-hidden`;
+  } hover:border-primary/30 w-full h-full min-h-[140px] overflow-hidden`;
 
   return (
     <>
