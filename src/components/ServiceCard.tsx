@@ -136,9 +136,9 @@ const ServiceCard = ({
         style={{ backgroundColor: colorStyle || "hsl(var(--primary))" }}
       />
 
-      {/* Admin controls — bottom-left to avoid link icon */}
+      {/* Admin controls — bottom-right */}
       {isAdmin && !isInDragMode && (
-        <div className="absolute bottom-2.5 left-4 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150 z-10">
+        <div className="absolute bottom-2.5 right-4 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150 z-10">
           <button
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); onEdit(); }}
             className="h-6 w-6 flex items-center justify-center rounded-md bg-secondary/80 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
