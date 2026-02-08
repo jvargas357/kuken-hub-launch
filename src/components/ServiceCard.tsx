@@ -119,17 +119,26 @@ const ServiceCard = ({
 
   const cardContent = (
     <>
-      {/* Ambient accent glow — sits behind the card content */}
+      {/* Inner noise texture for depth */}
+      <div className="absolute inset-0 rounded-xl opacity-[0.03] pointer-events-none bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIj48ZmlsdGVyIGlkPSJuIj48ZmVUdXJidWxlbmNlIHR5cGU9ImZyYWN0YWxOb2lzZSIgYmFzZUZyZXF1ZW5jeT0iLjgiIG51bU9jdGF2ZXM9IjQiIHN0aXRjaFRpbGVzPSJzdGl0Y2giLz48L2ZpbHRlcj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWx0ZXI9InVybCgjbikiIG9wYWNpdHk9IjEiLz48L3N2Zz4=')]" />
+
+      {/* Accent gradient wash — top edge */}
       <div
-        className="absolute -inset-px rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none -z-[1]"
+        className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
         style={{
-          background: `radial-gradient(ellipse 80% 60% at 50% 0%, ${colorStyle || "hsl(var(--primary))"} / 0.12, transparent 70%)`,
+          background: `radial-gradient(ellipse 100% 80% at 50% -20%, ${colorStyle || "hsl(var(--primary))"} / 0.1, transparent 60%)`,
         }}
       />
 
-      {/* Admin controls */}
+      {/* Left accent stripe */}
+      <div
+        className="absolute left-0 top-3 bottom-3 w-[2px] rounded-full transition-opacity duration-300 opacity-30 group-hover:opacity-70"
+        style={{ backgroundColor: colorStyle || "hsl(var(--primary))" }}
+      />
+
+      {/* Admin controls — bottom-left to avoid link icon */}
       {isAdmin && !isInDragMode && (
-        <div className="absolute top-3 right-3 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150 z-10">
+        <div className="absolute bottom-2.5 left-4 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150 z-10">
           <button
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); onEdit(); }}
             className="h-6 w-6 flex items-center justify-center rounded-md bg-secondary/80 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
@@ -147,39 +156,51 @@ const ServiceCard = ({
         </div>
       )}
 
-      {/* Drag handle in drag mode */}
+      {/* Drag handle */}
       {isInDragMode && (
         <div className="absolute top-3 right-3 text-muted-foreground/60">
           <GripVertical className="h-4 w-4" />
         </div>
       )}
 
-      {/* Icon + Name row */}
+      {/* Main content */}
       <div className="flex w-full items-center gap-4">
-        <div
-          className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-all duration-200 group-hover:scale-110 group-hover:shadow-lg"
-          style={{
-            backgroundColor: colorStyle ? `hsl(var(--${accentColor}) / 0.15)` : "hsl(var(--primary) / 0.15)",
-            color: colorStyle || "hsl(var(--primary))",
-            boxShadow: `0 0 0 1px ${colorStyle || "hsl(var(--primary))"} / 0.1`,
-          }}
-        >
-          {icon}
-        </div>
-
-        <div className="flex flex-col min-w-0">
-          <h3 className="font-display text-base font-semibold text-foreground truncate">{name}</h3>
-          <div className="flex items-center gap-1.5 mt-0.5">
-            <span
-              className="h-1.5 w-1.5 rounded-full animate-pulse"
-              style={{ backgroundColor: colorStyle || "hsl(var(--primary))" }}
-            />
-            <span className="text-[10px] text-muted-foreground font-mono uppercase tracking-widest">Live</span>
+        {/* Icon with inner glow */}
+        <div className="relative">
+          <div
+            className="absolute inset-0 rounded-xl blur-md opacity-0 group-hover:opacity-40 transition-opacity duration-500"
+            style={{ backgroundColor: colorStyle || "hsl(var(--primary))" }}
+          />
+          <div
+            className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-all duration-300 group-hover:scale-110"
+            style={{
+              backgroundColor: colorStyle ? `hsl(var(--${accentColor}) / 0.12)` : "hsl(var(--primary) / 0.12)",
+              color: colorStyle || "hsl(var(--primary))",
+              border: `1px solid ${colorStyle || "hsl(var(--primary))"} / 0.15`,
+            }}
+          >
+            {icon}
           </div>
         </div>
 
+        {/* Name + status */}
+        <div className="flex flex-col min-w-0 flex-1">
+          <h3 className="font-display text-base font-semibold text-foreground truncate">{name}</h3>
+          <div className="flex items-center gap-1.5 mt-0.5">
+            <span
+              className="h-1.5 w-1.5 rounded-full"
+              style={{
+                backgroundColor: colorStyle || "hsl(var(--primary))",
+                boxShadow: `0 0 6px 1px ${colorStyle || "hsl(var(--primary))"} / 0.5`,
+              }}
+            />
+            <span className="text-[10px] text-muted-foreground/70 font-mono uppercase tracking-widest">Online</span>
+          </div>
+        </div>
+
+        {/* External link — always top-right, clear of admin buttons */}
         {!isInDragMode && (
-          <ExternalLink className="h-3.5 w-3.5 text-muted-foreground/40 ml-auto shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-150" />
+          <ExternalLink className="h-3.5 w-3.5 text-muted-foreground/30 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 self-start mt-0.5" />
         )}
       </div>
 
@@ -188,12 +209,6 @@ const ServiceCard = ({
           <PythonOutput endpoint={pythonEndpoint!} script={pythonScript!} />
         </div>
       )}
-
-      {/* Bottom accent bar */}
-      <div
-        className="absolute bottom-0 left-5 right-5 h-[2px] rounded-full opacity-0 group-hover:opacity-60 transition-opacity duration-300"
-        style={{ background: `linear-gradient(90deg, transparent, ${colorStyle || "hsl(var(--primary))"}, transparent)` }}
-      />
     </>
   );
 
