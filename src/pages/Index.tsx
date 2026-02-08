@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Server, GripVertical, Check } from "lucide-react";
+import { Server, GripVertical, Plus, Check } from "lucide-react";
 import ServiceCard from "@/components/ServiceCard";
 import AddServiceCard from "@/components/AddServiceCard";
 import ServiceDialog from "@/components/ServiceDialog";
@@ -112,7 +112,7 @@ const Index = () => {
             </motion.p>
 
             {/* Drag mode toggle for admins */}
-            {!loading && isAdmin && services.length > 1 && (
+            {!loading && isAdmin && (
               <motion.button
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
@@ -137,7 +137,10 @@ const Index = () => {
                 ) : (
                   <>
                     <GripVertical className="h-3 w-3" />
-                    Reorder
+                    <span>Reorder</span>
+                    <span className="text-muted-foreground/60">/</span>
+                    <Plus className="h-3 w-3" />
+                    <span>Add</span>
                   </>
                 )}
               </motion.button>
@@ -175,7 +178,7 @@ const Index = () => {
                 />
               ))}
 
-            {!loading && isAdmin && !isDragMode && (
+            {!loading && isAdmin && isDragMode && (
               <AddServiceCard
                 index={services.length}
                 onClick={() => setDialogOpen(true)}

@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { motion, useMotionValue, useTransform, animate } from "framer-motion";
+import { motion, AnimatePresence, useMotionValue, animate } from "framer-motion";
 import { ExternalLink, X, Pencil, GripVertical } from "lucide-react";
 import type { ReactNode } from "react";
 import {
@@ -143,21 +143,50 @@ const ServiceCard = ({
           (e as unknown as React.DragEvent).preventDefault?.();
           onDrop?.();
         }}
-        className={`${sizeClass} relative ${
-          dragOverSide === "before"
-            ? "ring-2 ring-primary/50 ring-offset-2 ring-offset-background rounded-xl"
-            : dragOverSide === "after"
-            ? "ring-2 ring-primary/50 ring-offset-2 ring-offset-background rounded-xl"
-            : ""
-        }`}
+        className={`${sizeClass} relative`}
       >
-        {/* Drop indicator line */}
-        {dragOverSide === "before" && (
-          <div className="absolute -left-1 top-0 bottom-0 w-[3px] rounded-full bg-primary z-10" />
-        )}
-        {dragOverSide === "after" && (
-          <div className="absolute -right-1 top-0 bottom-0 w-[3px] rounded-full bg-primary z-10" />
-        )}
+        {/* Ghost drop placeholder — before */}
+        <AnimatePresence>
+          {dragOverSide === "before" && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, width: 0 }}
+              animate={{ opacity: 1, scale: 1, width: "auto" }}
+              exit={{ opacity: 0, scale: 0.9, width: 0 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+              className="absolute -left-2 top-0 bottom-0 w-[3px] z-10 pointer-events-none flex items-stretch"
+            >
+              <div className="w-full rounded-full bg-primary shadow-[0_0_8px_hsl(var(--primary)/0.5)]" />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Ghost drop placeholder — after */}
+        <AnimatePresence>
+          {dragOverSide === "after" && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, width: 0 }}
+              animate={{ opacity: 1, scale: 1, width: "auto" }}
+              exit={{ opacity: 0, scale: 0.9, width: 0 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+              className="absolute -right-2 top-0 bottom-0 w-[3px] z-10 pointer-events-none flex items-stretch"
+            >
+              <div className="w-full rounded-full bg-primary shadow-[0_0_8px_hsl(var(--primary)/0.5)]" />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Ghost card outline overlay */}
+        <AnimatePresence>
+          {dragOverSide && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.15 }}
+              className="absolute inset-0 rounded-xl border-2 border-dashed border-primary/40 bg-primary/5 z-[5] pointer-events-none"
+            />
+          )}
+        </AnimatePresence>
 
         <Tag
           {...(tagProps as any)}
