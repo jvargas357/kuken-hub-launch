@@ -94,9 +94,6 @@ const Index = () => {
           <h1 className="font-display text-3xl font-bold tracking-tight text-foreground md:text-4xl">
             Dashboard
           </h1>
-          <p className="text-muted-foreground max-w-md">
-            Your self-hosted services, one click away.
-          </p>
         </motion.header>
 
         {/* Services grid */}
