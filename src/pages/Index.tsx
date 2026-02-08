@@ -82,14 +82,14 @@ const Index = () => {
         transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
         className="sticky top-0 z-20 backdrop-blur-xl bg-background/60 border-b border-border/50"
       >
-        <div className="mx-auto max-w-[1400px] px-6 md:px-10 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="h-2 w-2 rounded-full bg-primary shadow-[0_0_8px_2px_hsl(var(--primary)/0.4)]" />
-            <span className="font-display text-lg font-semibold text-foreground tracking-tight">
+        <div className="mx-auto max-w-[1400px] px-4 sm:px-6 md:px-10 h-12 sm:h-14 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <div className="h-2 w-2 rounded-full bg-primary shadow-[0_0_8px_2px_hsl(var(--primary)/0.4)] shrink-0" />
+            <span className="font-display text-base sm:text-lg font-semibold text-foreground tracking-tight">
               jambiya
             </span>
-            <span className="text-muted-foreground/30 font-light">/</span>
-            <span className="font-mono text-xs text-muted-foreground/60 uppercase tracking-widest">
+            <span className="text-muted-foreground/30 font-light hidden sm:inline">/</span>
+            <span className="font-mono text-[10px] sm:text-xs text-muted-foreground/60 uppercase tracking-widest hidden sm:inline">
               dashboard
             </span>
           </div>
@@ -106,7 +106,7 @@ const Index = () => {
                 setDragOverId(null);
                 setDragOverSide(null);
               }}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono uppercase tracking-wider transition-all duration-150 ${
+              className={`flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-mono uppercase tracking-wider transition-all duration-150 shrink-0 ${
                 isDragMode
                   ? "bg-primary/20 text-primary border border-primary/30"
                   : "bg-secondary/60 text-muted-foreground hover:text-foreground hover:bg-secondary border border-transparent"
@@ -120,10 +120,10 @@ const Index = () => {
               ) : (
                 <>
                   <GripVertical className="h-3 w-3" />
-                  <span>Reorder</span>
-                  <span className="text-muted-foreground/40">/</span>
+                  <span className="hidden sm:inline">Reorder</span>
+                  <span className="text-muted-foreground/40 hidden sm:inline">/</span>
                   <Plus className="h-3 w-3" />
-                  <span>Add</span>
+                  <span className="hidden sm:inline">Add</span>
                 </>
               )}
             </motion.button>
@@ -133,7 +133,7 @@ const Index = () => {
 
       {/* Main content area — centered, wide */}
       <main className="flex-1 flex flex-col">
-        <div className="mx-auto w-full max-w-[1400px] px-6 md:px-10 py-10 md:py-16 flex-1">
+        <div className="mx-auto w-full max-w-[1400px] px-4 sm:px-6 md:px-10 py-6 sm:py-10 md:py-16 flex-1">
           {/* Section header */}
           <div className="flex items-center gap-3 mb-8">
             <motion.div
