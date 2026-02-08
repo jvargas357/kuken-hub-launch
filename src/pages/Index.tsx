@@ -1,8 +1,15 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Film, Cloud, ShieldCheck, Server } from "lucide-react";
 import ServiceCard from "@/components/ServiceCard";
+import AddServiceCard from "@/components/AddServiceCard";
+import AddServiceDialog from "@/components/AddServiceDialog";
+import CustomServiceCard from "@/components/CustomServiceCard";
+import { getIconByName } from "@/components/AddServiceDialog";
+import { useAutheliaUser } from "@/hooks/useAutheliaUser";
+import { useCustomServices } from "@/hooks/useCustomServices";
 
-const services = [
+const defaultServices = [
   {
     name: "Jellyfin",
     description: "Media server — movies, shows & music streaming",
@@ -30,6 +37,12 @@ const services = [
 ];
 
 const Index = () => {
+  const { isAdmin, loading } = useAutheliaUser();
+  const { services: customServices, addService, removeService } = useCustomServices();
+  const [dialogOpen, setDialogOpen] = useState(false);
+
+  const totalDefaultCount = defaultServices.length;
+
   return (
     <div className="ambient-bg dot-grid min-h-screen">
       <div className="mx-auto max-w-4xl px-6 py-16 md:py-24">
@@ -67,9 +80,29 @@ const Index = () => {
             Services
           </motion.p>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {services.map((service, i) => (
+            {defaultServices.map((service, i) => (
               <ServiceCard key={service.name} {...service} index={i} />
             ))}
+
+            {customServices.map((service, i) => (
+              <CustomServiceCard
+                key={service.id}
+                name={service.name}
+                description={service.description}
+                url={service.url}
+                icon={getIconByName(service.iconName)}
+                index={totalDefaultCount + i}
+                isAdmin={isAdmin}
+                onRemove={() => removeService(service.id)}
+              />
+            ))}
+
+            {!loading && isAdmin && (
+              <AddServiceCard
+                index={totalDefaultCount + customServices.length}
+                onClick={() => setDialogOpen(true)}
+              />
+            )}
           </div>
         </section>
 
@@ -85,6 +118,12 @@ const Index = () => {
           </p>
         </motion.footer>
       </div>
+
+      <AddServiceDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        onAdd={addService}
+      />
     </div>
   );
 };
