@@ -72,7 +72,7 @@ const ServiceCard = ({
       }} />
 
         {/* Admin controls */}
-        {isAdmin && <div className="absolute top-3 right-3 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 mx-0 my-[180px]">
+        {isAdmin && <div className="absolute bottom-3 right-3 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
             {onMoveUp && !isFirst && <button onClick={e => {
           e.preventDefault();
           e.stopPropagation();
