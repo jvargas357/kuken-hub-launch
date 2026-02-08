@@ -131,5 +131,27 @@ export function useServices() {
     [services, persist]
   );
 
-  return { services, loaded, addService, updateService, removeService, moveService };
+  const reorderService = useCallback(
+    (dragId: string, targetId: string, side: "before" | "after") => {
+      const sorted = [...services].sort((a, b) => a.order - b.order);
+      const dragIdx = sorted.findIndex((s) => s.id === dragId);
+      const targetIdx = sorted.findIndex((s) => s.id === targetId);
+      if (dragIdx < 0 || targetIdx < 0 || dragIdx === targetIdx) return;
+
+      // Remove dragged item
+      const [dragged] = sorted.splice(dragIdx, 1);
+
+      // Find new target index after removal
+      const newTargetIdx = sorted.findIndex((s) => s.id === targetId);
+      const insertIdx = side === "before" ? newTargetIdx : newTargetIdx + 1;
+      sorted.splice(insertIdx, 0, dragged);
+
+      // Re-assign orders
+      const reordered = sorted.map((s, i) => ({ ...s, order: i }));
+      persist(reordered);
+    },
+    [services, persist]
+  );
+
+  return { services, loaded, addService, updateService, removeService, moveService, reorderService };
 }
