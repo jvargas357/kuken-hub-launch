@@ -119,28 +119,30 @@ const ServiceCard = ({
 
   const cardContent = (
     <>
-      {/* Accent line */}
+      {/* Ambient accent glow — sits behind the card content */}
       <div
-        className="absolute top-0 left-6 right-6 h-[2px] rounded-full opacity-40 group-hover:opacity-80 transition-opacity duration-150"
-        style={{ backgroundColor: colorStyle || "hsl(var(--primary))" }}
+        className="absolute -inset-px rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none -z-[1]"
+        style={{
+          background: `radial-gradient(ellipse 80% 60% at 50% 0%, ${colorStyle || "hsl(var(--primary))"} / 0.12, transparent 70%)`,
+        }}
       />
 
-      {/* Admin controls — visible on hover */}
+      {/* Admin controls */}
       {isAdmin && !isInDragMode && (
-        <div className="absolute bottom-3 right-3 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+        <div className="absolute top-3 right-3 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150 z-10">
           <button
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); onEdit(); }}
-            className="h-7 w-7 flex items-center justify-center rounded-md bg-secondary/80 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+            className="h-6 w-6 flex items-center justify-center rounded-md bg-secondary/80 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
             aria-label={`Edit ${name}`}
           >
-            <Pencil className="h-3.5 w-3.5" />
+            <Pencil className="h-3 w-3" />
           </button>
           <button
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); setConfirmOpen(true); }}
-            className="h-7 w-7 flex items-center justify-center rounded-md bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors"
+            className="h-6 w-6 flex items-center justify-center rounded-md bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors"
             aria-label={`Remove ${name}`}
           >
-            <X className="h-3.5 w-3.5" />
+            <X className="h-3 w-3" />
           </button>
         </div>
       )}
@@ -152,45 +154,52 @@ const ServiceCard = ({
         </div>
       )}
 
-      <div className="flex w-full items-start justify-between">
+      {/* Icon + Name row */}
+      <div className="flex w-full items-center gap-4">
         <div
-          className="flex h-12 w-12 items-center justify-center rounded-lg transition-colors duration-150"
+          className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-xl transition-all duration-200 group-hover:scale-110 group-hover:shadow-lg"
           style={{
-            backgroundColor: colorStyle ? `hsl(var(--${accentColor}) / 0.12)` : "hsl(var(--primary) / 0.12)",
+            backgroundColor: colorStyle ? `hsl(var(--${accentColor}) / 0.15)` : "hsl(var(--primary) / 0.15)",
             color: colorStyle || "hsl(var(--primary))",
+            boxShadow: `0 0 0 1px ${colorStyle || "hsl(var(--primary))"} / 0.1`,
           }}
         >
           {icon}
         </div>
+
+        <div className="flex flex-col min-w-0">
+          <h3 className="font-display text-base font-semibold text-foreground truncate">{name}</h3>
+          <div className="flex items-center gap-1.5 mt-0.5">
+            <span
+              className="h-1.5 w-1.5 rounded-full animate-pulse"
+              style={{ backgroundColor: colorStyle || "hsl(var(--primary))" }}
+            />
+            <span className="text-[10px] text-muted-foreground font-mono uppercase tracking-widest">Live</span>
+          </div>
+        </div>
+
         {!isInDragMode && (
-          <ExternalLink className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity duration-150" />
+          <ExternalLink className="h-3.5 w-3.5 text-muted-foreground/40 ml-auto shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-150" />
         )}
       </div>
 
-      <div className="space-y-1">
-        <h3 className="font-display text-lg font-semibold text-foreground">{name}</h3>
-        <p className="text-sm text-muted-foreground leading-relaxed">{description}</p>
-      </div>
-
       {hasPython && !isInDragMode && (
-        <PythonOutput endpoint={pythonEndpoint!} script={pythonScript!} />
-      )}
-
-      {!hasPython && (
-        <div className="flex items-center gap-2 mt-auto">
-          <span
-            className="h-2 w-2 rounded-full animate-pulse"
-            style={{ backgroundColor: colorStyle || "hsl(var(--primary))" }}
-          />
-          <span className="text-xs text-muted-foreground font-mono uppercase tracking-wider">Online</span>
+        <div className="mt-3 w-full">
+          <PythonOutput endpoint={pythonEndpoint!} script={pythonScript!} />
         </div>
       )}
+
+      {/* Bottom accent bar */}
+      <div
+        className="absolute bottom-0 left-5 right-5 h-[2px] rounded-full opacity-0 group-hover:opacity-60 transition-opacity duration-300"
+        style={{ background: `linear-gradient(90deg, transparent, ${colorStyle || "hsl(var(--primary))"}, transparent)` }}
+      />
     </>
   );
 
-  const innerClassName = `glass-card ${glowClass || ""} group relative flex flex-col items-start gap-4 rounded-xl p-6 transition-all duration-150 ${
+  const innerClassName = `glass-card ${glowClass || ""} group relative flex flex-col items-start rounded-xl px-5 py-4 transition-all duration-200 ${
     isInDragMode ? "cursor-grab active:cursor-grabbing" : "cursor-pointer"
-  } hover:border-primary/30 w-full h-full`;
+  } hover:border-primary/30 w-full h-full overflow-hidden`;
 
   return (
     <>
