@@ -26,8 +26,10 @@ import {
 } from "lucide-react";
 import type { ReactNode } from "react";
 import type { Service, ServiceSize } from "@/hooks/useServices";
+import NerdFontIcon, { NERD_FONT_GLYPHS } from "@/components/NerdFontIcon";
 
-export const ICON_OPTIONS: { value: string; label: string; icon: ReactNode }[] = [
+/** Lucide icon options */
+const LUCIDE_ICON_OPTIONS: { value: string; label: string; icon: ReactNode }[] = [
   { value: "Film", label: "Film", icon: <Film className="h-4 w-4" /> },
   { value: "ShieldCheck", label: "Shield Check", icon: <ShieldCheck className="h-4 w-4" /> },
   { value: "Cloud", label: "Cloud", icon: <Cloud className="h-4 w-4" /> },
@@ -50,6 +52,18 @@ export const ICON_OPTIONS: { value: string; label: string; icon: ReactNode }[] =
   { value: "Code", label: "Code", icon: <Code className="h-4 w-4" /> },
 ];
 
+/** Nerd Font icon options */
+const NF_ICON_OPTIONS: { value: string; label: string; icon: ReactNode }[] = Object.entries(
+  NERD_FONT_GLYPHS
+).map(([key, { glyph, label }]) => ({
+  value: key,
+  label,
+  icon: <NerdFontIcon glyph={glyph} className="text-base" />,
+}));
+
+/** Combined icon list (Lucide first, then Nerd Fonts) */
+export const ICON_OPTIONS = [...LUCIDE_ICON_OPTIONS, ...NF_ICON_OPTIONS];
+
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   Film, ShieldCheck, Cloud, Monitor, Shield, Database, Mail, Download,
   HardDrive, Wifi, Camera, Gamepad2, BarChart3, Globe, Terminal,
@@ -57,6 +71,12 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
 };
 
 export function getIconByName(name: string): ReactNode {
+  // Nerd Font icon
+  if (name.startsWith("nf-")) {
+    const nf = NERD_FONT_GLYPHS[name];
+    if (nf) return <NerdFontIcon glyph={nf.glyph} className="text-2xl" />;
+  }
+  // Lucide icon
   const Icon = ICON_MAP[name];
   return Icon ? <Icon className="h-6 w-6" /> : <Globe className="h-6 w-6" />;
 }
@@ -182,7 +202,21 @@ const ServiceDialog = ({ open, onOpenChange, onSubmit, editingService }: Service
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-card border-border max-h-48">
-                  {ICON_OPTIONS.map((opt) => (
+                  <SelectItem disabled value="__lucide_header" className="text-xs text-muted-foreground font-mono uppercase tracking-wider">
+                    Lucide Icons
+                  </SelectItem>
+                  {LUCIDE_ICON_OPTIONS.map((opt) => (
+                    <SelectItem key={opt.value} value={opt.value}>
+                      <span className="flex items-center gap-2">
+                        {opt.icon}
+                        {opt.label}
+                      </span>
+                    </SelectItem>
+                  ))}
+                  <SelectItem disabled value="__nf_header" className="text-xs text-muted-foreground font-mono uppercase tracking-wider mt-2">
+                    Nerd Font Icons
+                  </SelectItem>
+                  {NF_ICON_OPTIONS.map((opt) => (
                     <SelectItem key={opt.value} value={opt.value}>
                       <span className="flex items-center gap-2">
                         {opt.icon}

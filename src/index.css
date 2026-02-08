@@ -2,6 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Nerd Fonts – Symbols Only */
+@font-face {
+  font-family: 'Symbols Nerd Font Mono';
+  src: url('/fonts/SymbolsNerdFontMono-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* Homelab Dashboard Design System */
 
 @import url('https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
