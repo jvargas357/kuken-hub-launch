@@ -93,9 +93,9 @@
 /* Ambient glow background */
 .ambient-bg {
   background: 
-    radial-gradient(ellipse 60% 50% at 20% 60%, hsl(265 65% 55% / 0.06) 0%, transparent 70%),
-    radial-gradient(ellipse 50% 40% at 80% 30%, hsl(210 85% 50% / 0.06) 0%, transparent 70%),
-    radial-gradient(ellipse 40% 50% at 50% 90%, hsl(155 65% 45% / 0.04) 0%, transparent 70%),
+    radial-gradient(ellipse 80% 60% at 10% 80%, hsl(265 65% 55% / 0.05) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 90% 20%, hsl(210 85% 50% / 0.05) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 50% 50%, hsl(155 65% 45% / 0.03) 0%, transparent 50%),
     hsl(var(--background));
 }
 
@@ -128,12 +128,6 @@
   box-shadow: 0 0 30px -5px hsl(var(--vaultwarden-glow) / 0.3), 
               0 0 60px -15px hsl(var(--vaultwarden-glow) / 0.15);
   border-color: hsl(var(--vaultwarden) / 0.4) !important;
-}
-
-/* Dot grid pattern */
-.dot-grid {
-  background-image: radial-gradient(circle, hsl(var(--muted-foreground) / 0.08) 1px, transparent 1px);
-  background-size: 32px 32px;
 }
 
 /* Mobile: show admin controls on tap (no hover) */

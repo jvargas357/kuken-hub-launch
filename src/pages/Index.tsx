@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Server, GripVertical, Plus, Check } from "lucide-react";
+import { motion } from "framer-motion";
+import { GripVertical, Plus, Check } from "lucide-react";
 import ServiceCard from "@/components/ServiceCard";
 import AddServiceCard from "@/components/AddServiceCard";
 import ServiceDialog from "@/components/ServiceDialog";
@@ -74,77 +74,86 @@ const Index = () => {
   }, [handleDragEnd]);
 
   return (
-    <div className="ambient-bg dot-grid min-h-screen">
-      <div className="mx-auto max-w-4xl px-6 py-16 md:py-24">
-        {/* Header */}
-        <motion.header
-          initial={{ opacity: 0, y: -16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
-          className="mb-16 space-y-3"
-        >
-          <div className="flex items-center gap-3 mb-4">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-              <Server className="h-5 w-5 text-primary" />
-            </div>
-            <span className="font-mono text-sm text-muted-foreground tracking-widest uppercase">
-              jambiya.me
+    <div className="ambient-bg min-h-screen flex flex-col">
+      {/* Top bar — compact branding + controls */}
+      <motion.header
+        initial={{ opacity: 0, y: -8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
+        className="sticky top-0 z-20 backdrop-blur-xl bg-background/60 border-b border-border/50"
+      >
+        <div className="mx-auto max-w-[1400px] px-6 md:px-10 h-14 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="h-2 w-2 rounded-full bg-primary shadow-[0_0_8px_2px_hsl(var(--primary)/0.4)]" />
+            <span className="font-display text-lg font-semibold text-foreground tracking-tight">
+              jambiya
+            </span>
+            <span className="text-muted-foreground/30 font-light">/</span>
+            <span className="font-mono text-xs text-muted-foreground/60 uppercase tracking-widest">
+              dashboard
             </span>
           </div>
-          <h1 className="font-display text-3xl font-bold tracking-tight text-foreground md:text-4xl">
-            Dashboard
-          </h1>
-        </motion.header>
 
-        {/* Services grid */}
-        <section>
-          <div className="flex items-center justify-between mb-6">
-            <motion.p
+          {/* Admin controls */}
+          {!loading && isAdmin && (
+            <motion.button
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.2 }}
-              className="font-mono text-xs text-muted-foreground uppercase tracking-widest"
+              onClick={() => {
+                setIsDragMode((prev) => !prev);
+                setDraggingId(null);
+                setDragOverId(null);
+                setDragOverSide(null);
+              }}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono uppercase tracking-wider transition-all duration-150 ${
+                isDragMode
+                  ? "bg-primary/20 text-primary border border-primary/30"
+                  : "bg-secondary/60 text-muted-foreground hover:text-foreground hover:bg-secondary border border-transparent"
+              }`}
+            >
+              {isDragMode ? (
+                <>
+                  <Check className="h-3 w-3" />
+                  Done
+                </>
+              ) : (
+                <>
+                  <GripVertical className="h-3 w-3" />
+                  <span>Reorder</span>
+                  <span className="text-muted-foreground/40">/</span>
+                  <Plus className="h-3 w-3" />
+                  <span>Add</span>
+                </>
+              )}
+            </motion.button>
+          )}
+        </div>
+      </motion.header>
+
+      {/* Main content area — centered, wide */}
+      <main className="flex-1 flex flex-col">
+        <div className="mx-auto w-full max-w-[1400px] px-6 md:px-10 py-10 md:py-16 flex-1">
+          {/* Section header */}
+          <div className="flex items-center gap-3 mb-8">
+            <motion.div
+              initial={{ scaleX: 0 }}
+              animate={{ scaleX: 1 }}
+              transition={{ duration: 0.6, delay: 0.1, ease: [0.23, 1, 0.32, 1] }}
+              className="h-[1px] w-12 bg-gradient-to-r from-primary/60 to-transparent origin-left"
+            />
+            <motion.p
+              initial={{ opacity: 0, x: -8 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.15 }}
+              className="font-mono text-[11px] text-muted-foreground/50 uppercase tracking-[0.2em]"
             >
               Services
             </motion.p>
-
-            {/* Drag mode toggle for admins */}
-            {!loading && isAdmin && (
-              <motion.button
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.3 }}
-                onClick={() => {
-                  setIsDragMode((prev) => !prev);
-                  setDraggingId(null);
-                  setDragOverId(null);
-                  setDragOverSide(null);
-                }}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono uppercase tracking-wider transition-all duration-150 ${
-                  isDragMode
-                    ? "bg-primary/20 text-primary border border-primary/30"
-                    : "bg-secondary/60 text-muted-foreground hover:text-foreground hover:bg-secondary border border-transparent"
-                }`}
-              >
-                {isDragMode ? (
-                  <>
-                    <Check className="h-3 w-3" />
-                    Done
-                  </>
-                ) : (
-                  <>
-                    <GripVertical className="h-3 w-3" />
-                    <span>Reorder</span>
-                    <span className="text-muted-foreground/60">/</span>
-                    <Plus className="h-3 w-3" />
-                    <span>Add</span>
-                  </>
-                )}
-              </motion.button>
-            )}
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {/* Services grid — wider, responsive columns */}
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {loaded &&
               services.map((service, i) => (
                 <ServiceCard
@@ -182,20 +191,20 @@ const Index = () => {
               />
             )}
           </div>
-        </section>
+        </div>
 
-        {/* Footer */}
+        {/* Footer — bottom edge */}
         <motion.footer
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.6 }}
-          className="mt-20 text-center"
+          transition={{ delay: 0.5 }}
+          className="py-8 text-center"
         >
-          <p className="font-mono text-xs text-muted-foreground/50">
+          <p className="font-mono text-[10px] text-muted-foreground/30 tracking-widest uppercase">
             *.jambiya.me
           </p>
         </motion.footer>
-      </div>
+      </main>
 
       <ServiceDialog
         open={dialogOpen}
