@@ -10,7 +10,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -21,8 +20,7 @@ import {
 import {
   Monitor, Shield, Database, Mail, Download, HardDrive,
   Wifi, Camera, Gamepad2, BarChart3, Globe, Terminal,
-  Container, Home, Music, Image, Film, ShieldCheck, Cloud,
-  Code,
+  Container, Home, Music, Image, Film, ShieldCheck, Cloud, Code,
 } from "lucide-react";
 import type { ReactNode } from "react";
 import type { Service, ServiceSize } from "@/hooks/useServices";
@@ -99,9 +97,6 @@ const ServiceDialog = ({ open, onOpenChange, onSubmit, editingService }: Service
   const [url, setUrl] = useState("");
   const [iconName, setIconName] = useState("Globe");
   const [size, setSize] = useState<ServiceSize>("1x1");
-  const [pythonEndpoint, setPythonEndpoint] = useState("");
-  const [pythonScript, setPythonScript] = useState("");
-  const [showPython, setShowPython] = useState(false);
 
   useEffect(() => {
     if (editingService) {
@@ -110,18 +105,12 @@ const ServiceDialog = ({ open, onOpenChange, onSubmit, editingService }: Service
       setUrl(editingService.url);
       setIconName(editingService.iconName);
       setSize(editingService.size);
-      setPythonEndpoint(editingService.pythonEndpoint || "");
-      setPythonScript(editingService.pythonScript || "");
-      setShowPython(!!(editingService.pythonEndpoint || editingService.pythonScript));
     } else {
       setName("");
       setDescription("");
       setUrl("");
       setIconName("Globe");
       setSize("1x1");
-      setPythonEndpoint("");
-      setPythonScript("");
-      setShowPython(false);
     }
   }, [editingService, open]);
 
@@ -136,8 +125,6 @@ const ServiceDialog = ({ open, onOpenChange, onSubmit, editingService }: Service
       size,
       accentColor: editingService?.accentColor,
       glowClass: editingService?.glowClass,
-      pythonEndpoint: pythonEndpoint.trim() || undefined,
-      pythonScript: pythonScript.trim() || undefined,
     });
     onOpenChange(false);
   };
@@ -243,48 +230,6 @@ const ServiceDialog = ({ open, onOpenChange, onSubmit, editingService }: Service
                 </SelectContent>
               </Select>
             </div>
-          </div>
-
-          {/* Python Section */}
-          <div className="space-y-2 pt-2 border-t border-border">
-            <button
-              type="button"
-              onClick={() => setShowPython(!showPython)}
-              className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <Code className="h-4 w-4" />
-              <span>{showPython ? "Hide" : "Show"} Python Execution</span>
-            </button>
-
-            {showPython && (
-              <div className="space-y-3 pt-2">
-                <div className="space-y-2">
-                  <Label htmlFor="svc-py-endpoint" className="text-muted-foreground">
-                    Python API Endpoint
-                  </Label>
-                  <Input
-                    id="svc-py-endpoint"
-                    placeholder="https://api.jambiya.me/execute"
-                    value={pythonEndpoint}
-                    onChange={(e) => setPythonEndpoint(e.target.value)}
-                    className="bg-secondary border-border font-mono text-xs"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="svc-py-script" className="text-muted-foreground">
-                    Python Script
-                  </Label>
-                  <Textarea
-                    id="svc-py-script"
-                    placeholder={"import requests\nresult = requests.get('https://...')\nprint(result.json())"}
-                    value={pythonScript}
-                    onChange={(e) => setPythonScript(e.target.value)}
-                    className="bg-secondary border-border font-mono text-xs min-h-[120px]"
-                  />
-                </div>
-              </div>
-            )}
           </div>
 
           <DialogFooter>

@@ -1,13 +1,16 @@
 import { useState, useCallback } from "react";
 import { motion } from "framer-motion";
-import { GripVertical, Plus, Check } from "lucide-react";
+import { GripVertical, Plus, Check, LayoutGrid, Activity } from "lucide-react";
 import ServiceCard from "@/components/ServiceCard";
 import AddServiceCard from "@/components/AddServiceCard";
 import ServiceDialog from "@/components/ServiceDialog";
 import { getIconByName } from "@/components/ServiceDialog";
+import SystemHealth from "@/components/SystemHealth";
 import { useAutheliaUser } from "@/hooks/useAutheliaUser";
 import { useServices } from "@/hooks/useServices";
 import type { Service } from "@/hooks/useServices";
+
+type Tab = "services" | "health";
 
 const Index = () => {
   const { isAdmin, loading } = useAutheliaUser();
@@ -15,6 +18,7 @@ const Index = () => {
     useServices();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
+  const [activeTab, setActiveTab] = useState<Tab>("services");
 
   // Drag state
   const [isDragMode, setIsDragMode] = useState(false);
@@ -75,7 +79,7 @@ const Index = () => {
 
   return (
     <div className="ambient-bg min-h-screen flex flex-col">
-      {/* Top bar — compact branding + controls */}
+      {/* Top bar */}
       <motion.header
         initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
@@ -88,14 +92,36 @@ const Index = () => {
             <span className="font-display text-base sm:text-lg font-semibold text-foreground tracking-tight">
               jambiya
             </span>
-            <span className="text-muted-foreground/30 font-light hidden sm:inline">/</span>
-            <span className="font-mono text-[10px] sm:text-xs text-muted-foreground/60 uppercase tracking-widest hidden sm:inline">
-              dashboard
-            </span>
+
+            {/* Tab switcher */}
+            <div className="flex items-center gap-0.5 ml-2 sm:ml-4 bg-secondary/50 rounded-lg p-0.5">
+              <button
+                onClick={() => { setActiveTab("services"); setIsDragMode(false); }}
+                className={`flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-md text-[10px] sm:text-[11px] font-mono uppercase tracking-wider transition-all ${
+                  activeTab === "services"
+                    ? "bg-background/80 text-foreground shadow-sm"
+                    : "text-muted-foreground/60 hover:text-muted-foreground"
+                }`}
+              >
+                <LayoutGrid className="h-3 w-3" />
+                <span className="hidden sm:inline">Services</span>
+              </button>
+              <button
+                onClick={() => { setActiveTab("health"); setIsDragMode(false); }}
+                className={`flex items-center gap-1 px-2 sm:px-2.5 py-1 rounded-md text-[10px] sm:text-[11px] font-mono uppercase tracking-wider transition-all ${
+                  activeTab === "health"
+                    ? "bg-background/80 text-foreground shadow-sm"
+                    : "text-muted-foreground/60 hover:text-muted-foreground"
+                }`}
+              >
+                <Activity className="h-3 w-3" />
+                <span className="hidden sm:inline">System</span>
+              </button>
+            </div>
           </div>
 
-          {/* Admin controls */}
-          {!loading && isAdmin && (
+          {/* Admin controls — only on services tab */}
+          {!loading && isAdmin && activeTab === "services" && (
             <motion.button
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -131,69 +157,73 @@ const Index = () => {
         </div>
       </motion.header>
 
-      {/* Main content area — centered, wide */}
+      {/* Main content */}
       <main className="flex-1 flex flex-col">
         <div className="mx-auto w-full max-w-[1400px] px-4 sm:px-6 md:px-10 py-6 sm:py-10 md:py-16 flex-1">
-          {/* Section header */}
-          <div className="flex items-center gap-3 mb-8">
-            <motion.div
-              initial={{ scaleX: 0 }}
-              animate={{ scaleX: 1 }}
-              transition={{ duration: 0.6, delay: 0.1, ease: [0.23, 1, 0.32, 1] }}
-              className="h-[1px] w-12 bg-gradient-to-r from-primary/60 to-transparent origin-left"
-            />
-            <motion.p
-              initial={{ opacity: 0, x: -8 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.15 }}
-              className="font-mono text-[11px] text-muted-foreground/50 uppercase tracking-[0.2em]"
-            >
-              Services
-            </motion.p>
-          </div>
-
-          {/* Services grid — wider, responsive columns */}
-          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {loaded &&
-              services.map((service, i) => (
-                <ServiceCard
-                  key={service.id}
-                  name={service.name}
-                  description={service.description}
-                  url={service.url}
-                  icon={getIconByName(service.iconName)}
-                  accentColor={service.accentColor}
-                  glowClass={service.glowClass}
-                  size={service.size}
-                  index={i}
-                  isAdmin={isAdmin}
-                  isFirst={i === 0}
-                  isLast={i === services.length - 1}
-                  pythonEndpoint={service.pythonEndpoint}
-                  pythonScript={service.pythonScript}
-                  isDragMode={isDragMode}
-                  isDraggingThis={draggingId === service.id}
-                  dragOverSide={dragOverId === service.id ? dragOverSide : null}
-                  onRemove={() => removeService(service.id)}
-                  onEdit={() => handleEdit(service)}
-                  onDragStart={() => handleDragStart(service.id)}
-                  onDragEnd={handleDragEnd}
-                  onDragOver={(side) => handleDragOver(service.id, side)}
-                  onDragLeave={handleDragLeave}
-                  onDrop={handleDrop}
+          {activeTab === "services" && (
+            <>
+              {/* Section header */}
+              <div className="flex items-center gap-3 mb-8">
+                <motion.div
+                  initial={{ scaleX: 0 }}
+                  animate={{ scaleX: 1 }}
+                  transition={{ duration: 0.6, delay: 0.1, ease: [0.23, 1, 0.32, 1] }}
+                  className="h-[1px] w-12 bg-gradient-to-r from-primary/60 to-transparent origin-left"
                 />
-              ))}
+                <motion.p
+                  initial={{ opacity: 0, x: -8 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.15 }}
+                  className="font-mono text-[11px] text-muted-foreground/50 uppercase tracking-[0.2em]"
+                >
+                  Services
+                </motion.p>
+              </div>
 
-            {!loading && isAdmin && isDragMode && (
-              <AddServiceCard
-                index={services.length}
-                onClick={() => setDialogOpen(true)}
-              />
-            )}
-          </div>
+              {/* Services grid */}
+              <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {loaded &&
+                  services.map((service, i) => (
+                    <ServiceCard
+                      key={service.id}
+                      name={service.name}
+                      description={service.description}
+                      url={service.url}
+                      icon={getIconByName(service.iconName)}
+                      accentColor={service.accentColor}
+                      glowClass={service.glowClass}
+                      size={service.size}
+                      index={i}
+                      isAdmin={isAdmin}
+                      isFirst={i === 0}
+                      isLast={i === services.length - 1}
+                      isDragMode={isDragMode}
+                      isDraggingThis={draggingId === service.id}
+                      dragOverSide={dragOverId === service.id ? dragOverSide : null}
+                      onRemove={() => removeService(service.id)}
+                      onEdit={() => handleEdit(service)}
+                      onDragStart={() => handleDragStart(service.id)}
+                      onDragEnd={handleDragEnd}
+                      onDragOver={(side) => handleDragOver(service.id, side)}
+                      onDragLeave={handleDragLeave}
+                      onDrop={handleDrop}
+                    />
+                  ))}
+
+                {!loading && isAdmin && isDragMode && (
+                  <AddServiceCard
+                    index={services.length}
+                    onClick={() => setDialogOpen(true)}
+                  />
+                )}
+              </div>
+            </>
+          )}
+
+          {activeTab === "health" && <SystemHealth />}
         </div>
 
-        {/* Footer — bottom edge */}
+        {/* Footer */}
         <motion.footer
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

@@ -12,8 +12,6 @@ export interface Service {
   glowClass?: string;
   size: ServiceSize;
   order: number;
-  pythonEndpoint?: string;
-  pythonScript?: string;
 }
 
 const STORAGE_KEY = "homelab-services-v2";
