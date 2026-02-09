@@ -63,7 +63,7 @@ const ListDisplay = ({ data, widget }: { data: any; widget: Widget }) => {
 const LogFeedDisplay = ({ data }: { data: any }) => {
   const lines = Array.isArray(data) ? data : [];
   return (
-    <div className="font-mono text-[9px] leading-relaxed space-y-0.5 max-h-[100px] overflow-y-auto scrollbar-thin">
+    <div className="font-mono text-[9px] leading-relaxed space-y-0.5 max-h-[100px] overflow-y-auto scrollbar-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none]">
       {lines.slice(0, 10).map((line: string, i: number) => (
         <p key={i} className="text-muted-foreground/70 truncate hover:text-foreground transition-colors">{String(line)}</p>
       ))}
@@ -176,6 +176,71 @@ const WidgetCard = ({ widget, index, isAdmin, isDragMode, isDraggingThis, dragOv
     }
   };
 
+  const cardContent = (
+    <>
+      {/* Noise texture */}
+      <div className="absolute inset-0 rounded-xl opacity-[0.03] pointer-events-none bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIj48ZmlsdGVyIGlkPSJuIj48ZmVUdXJidWxlbmNlIHR5cGU9ImZyYWN0YWxOb2lzZSIgYmFzZUZyZXF1ZW5jeT0iLjgiIG51bU9jdGF2ZXM9IjQiIHN0aXRjaFRpbGVzPSJzdGl0Y2giLz48L2ZpbHRlcj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWx0ZXI9InVybCgjbikiIG9wYWNpdHk9IjEiLz48L3N2Zz4=')]" />
+
+      {/* Accent orb */}
+      <div className="absolute -top-6 -right-6 h-24 w-24 rounded-full opacity-[0.04] sm:opacity-0 group-hover:opacity-[0.08] transition-opacity duration-700 pointer-events-none blur-2xl"
+        style={{ backgroundColor: colorStyle }} />
+
+      {/* Bottom accent bar */}
+      <div className="absolute bottom-0 left-3 right-3 h-[1px] rounded-full transition-opacity duration-500 opacity-20 sm:opacity-0 group-hover:opacity-40"
+        style={{ background: `linear-gradient(90deg, transparent, ${colorStyle}, transparent)` }} />
+
+      {/* Admin controls — only in reorder/add mode */}
+      {isAdmin && isInDragMode && (
+        <div className="absolute bottom-2 right-2 flex items-center gap-0.5 z-10">
+          <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onEdit(); }}
+            className="h-5 w-5 flex items-center justify-center rounded bg-secondary/80 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors">
+            <Pencil className="h-2.5 w-2.5" />
+          </button>
+          <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); setConfirmOpen(true); }}
+            className="h-5 w-5 flex items-center justify-center rounded bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors">
+            <X className="h-2.5 w-2.5" />
+          </button>
+        </div>
+      )}
+
+      {/* Drag handle */}
+      {isInDragMode && (
+        <div className="absolute top-2 right-2 text-muted-foreground/60">
+          <GripVertical className="h-3.5 w-3.5" />
+        </div>
+      )}
+
+      {/* Header */}
+      <div className="flex items-center gap-2 mb-1.5 relative z-[1]">
+        <div className="relative w-fit">
+          <div className="absolute inset-0 rounded-lg blur-lg opacity-0 group-hover:opacity-50 transition-opacity duration-500 scale-150"
+            style={{ backgroundColor: colorStyle }} />
+          <div className="relative flex h-6 w-6 shrink-0 items-center justify-center rounded-md transition-all duration-300 group-hover:scale-110"
+            style={{
+              backgroundColor: `hsl(var(--${widget.accentColor || "primary"}) / 0.12)`,
+              color: colorStyle,
+              border: `1px solid hsl(var(--${widget.accentColor || "primary"}) / 0.15)`,
+            }}>
+            <div className="scale-[0.5]">{getIconByName(widget.iconName)}</div>
+          </div>
+        </div>
+        <h3 className="font-display text-[12px] font-semibold text-foreground truncate leading-tight flex-1">{widget.title}</h3>
+        {!isInDragMode && (
+          <div className="flex items-center gap-0.5 shrink-0">
+            <span className="font-mono text-[7px] text-muted-foreground/25 uppercase">{widget.pollInterval}s</span>
+            <RefreshCw className="h-2 w-2 text-muted-foreground/20" />
+          </div>
+        )}
+      </div>
+
+      <div className="relative z-[1]">{renderContent()}</div>
+    </>
+  );
+
+  const innerClassName = `glass-card group relative flex flex-col rounded-xl px-3 py-2.5 sm:px-3.5 sm:py-3 transition-all duration-200 ${
+    isInDragMode ? "cursor-grab active:cursor-grabbing" : ""
+  } hover:border-primary/30 w-full h-full overflow-hidden`;
+
   return (
     <>
       <div
@@ -188,6 +253,7 @@ const WidgetCard = ({ widget, index, isAdmin, isDragMode, isDraggingThis, dragOv
         onDragLeave={isInDragMode ? handleNativeDragLeave : undefined}
         onDrop={isInDragMode ? handleNativeDrop : undefined}
       >
+        {/* Drop indicators — identical to ServiceCard */}
         <AnimatePresence>
           {dragOverSide === "before" && (
             <motion.div key="indicator-before" initial={{ opacity: 0, scaleY: 0.6 }} animate={{ opacity: 1, scaleY: 1 }} exit={{ opacity: 0, scaleY: 0.6 }} transition={{ duration: 0.15 }}
@@ -212,48 +278,10 @@ const WidgetCard = ({ widget, index, isAdmin, isDragMode, isDraggingThis, dragOv
           animate={{ opacity: isDraggingThis ? 0.35 : 1, y: 0, scale: isDraggingThis ? 0.95 : 1 }}
           transition={{ duration: 0.25, delay: index * 0.04, ease: [0.16, 1, 0.3, 1] }}
           style={{ rotate: jellyRotate, scale: jellyScale }}
+          whileHover={isInDragMode ? undefined : { y: -2, scale: 1.01 }}
+          whileTap={isInDragMode ? undefined : { scale: 0.98 }}
         >
-          <div className={`glass-card group relative rounded-xl px-3 py-2.5 sm:px-3.5 sm:py-3 h-full overflow-hidden ${isInDragMode ? "cursor-grab active:cursor-grabbing" : ""}`}>
-            <div className="absolute inset-0 rounded-xl opacity-[0.03] pointer-events-none bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIj48ZmlsdGVyIGlkPSJuIj48ZmVUdXJidWxlbmNlIHR5cGU9ImZyYWN0YWxOb2lzZSIgYmFzZUZyZXF1ZW5jeT0iLjgiIG51bU9jdGF2ZXM9IjQiIHN0aXRjaFRpbGVzPSJzdGl0Y2giLz48L2ZpbHRlcj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWx0ZXI9InVybCgjbikiIG9wYWNpdHk9IjEiLz48L3N2Zz4=')]" />
-            <div className="absolute -top-6 -right-6 h-24 w-24 rounded-full opacity-[0.04] group-hover:opacity-[0.08] transition-opacity duration-700 pointer-events-none blur-2xl" style={{ backgroundColor: colorStyle }} />
-            <div className="absolute bottom-0 left-3 right-3 h-[1px] rounded-full transition-opacity duration-500 opacity-0 group-hover:opacity-40"
-              style={{ background: `linear-gradient(90deg, transparent, ${colorStyle}, transparent)` }} />
-
-            {isAdmin && isInDragMode && (
-              <div className="absolute top-2 right-2 flex items-center gap-0.5 z-10">
-                <button onClick={(e) => { e.stopPropagation(); onEdit(); }}
-                  className="h-5 w-5 flex items-center justify-center rounded bg-secondary/80 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors">
-                  <Pencil className="h-2.5 w-2.5" />
-                </button>
-                <button onClick={(e) => { e.stopPropagation(); setConfirmOpen(true); }}
-                  className="h-5 w-5 flex items-center justify-center rounded bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors">
-                  <X className="h-2.5 w-2.5" />
-                </button>
-              </div>
-            )}
-
-            {isInDragMode && (
-              <div className="absolute bottom-2 right-2 text-muted-foreground/60 z-10">
-                <GripVertical className="h-3.5 w-3.5" />
-              </div>
-            )}
-
-            <div className="flex items-center gap-2 mb-1.5 relative z-[1]">
-              <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded"
-                style={{ backgroundColor: `hsl(var(--${widget.accentColor || "primary"}) / 0.12)`, color: colorStyle }}>
-                <div className="scale-[0.55]">{getIconByName(widget.iconName)}</div>
-              </div>
-              <h3 className="font-display text-[11px] font-semibold text-foreground truncate leading-tight flex-1">{widget.title}</h3>
-              {!isInDragMode && (
-                <div className="flex items-center gap-0.5">
-                  <span className="font-mono text-[7px] text-muted-foreground/25 uppercase">{widget.pollInterval}s</span>
-                  <RefreshCw className="h-2 w-2 text-muted-foreground/20" />
-                </div>
-              )}
-            </div>
-
-            <div className="relative z-[1]">{renderContent()}</div>
-          </div>
+          <div className={innerClassName}>{cardContent}</div>
         </motion.div>
       </div>
 
