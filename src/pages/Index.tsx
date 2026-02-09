@@ -8,6 +8,9 @@ import { getIconByName } from "@/components/ServiceDialog";
 import { useAutheliaUser } from "@/hooks/useAutheliaUser";
 import { useServices } from "@/hooks/useServices";
 import type { Service } from "@/hooks/useServices";
+import SystemHealthCards from "@/components/dashboard/SystemHealthCards";
+import ActivityFeed from "@/components/dashboard/ActivityFeed";
+import QuickActions from "@/components/dashboard/QuickActions";
 
 const Index = () => {
   const { isAdmin, loading } = useAutheliaUser();
@@ -75,7 +78,7 @@ const Index = () => {
 
   return (
     <div className="ambient-bg min-h-screen flex flex-col">
-      {/* Top bar — compact branding + controls */}
+      {/* Top bar */}
       <motion.header
         initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
@@ -94,7 +97,6 @@ const Index = () => {
             </span>
           </div>
 
-          {/* Admin controls */}
           {!loading && isAdmin && (
             <motion.button
               initial={{ opacity: 0 }}
@@ -131,69 +133,101 @@ const Index = () => {
         </div>
       </motion.header>
 
-      {/* Main content area — centered, wide */}
+      {/* Main content */}
       <main className="flex-1 flex flex-col">
-        <div className="mx-auto w-full max-w-[1400px] px-4 sm:px-6 md:px-10 py-6 sm:py-10 md:py-16 flex-1">
-          {/* Section header */}
-          <div className="flex items-center gap-3 mb-8">
-            <motion.div
-              initial={{ scaleX: 0 }}
-              animate={{ scaleX: 1 }}
-              transition={{ duration: 0.6, delay: 0.1, ease: [0.23, 1, 0.32, 1] }}
-              className="h-[1px] w-12 bg-gradient-to-r from-primary/60 to-transparent origin-left"
-            />
-            <motion.p
-              initial={{ opacity: 0, x: -8 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.15 }}
-              className="font-mono text-[11px] text-muted-foreground/50 uppercase tracking-[0.2em]"
-            >
-              Services
-            </motion.p>
-          </div>
-
-          {/* Services grid — wider, responsive columns */}
-          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {loaded &&
-              services.map((service, i) => (
-                <ServiceCard
-                  key={service.id}
-                  name={service.name}
-                  description={service.description}
-                  url={service.url}
-                  icon={getIconByName(service.iconName)}
-                  accentColor={service.accentColor}
-                  glowClass={service.glowClass}
-                  size={service.size}
-                  index={i}
-                  isAdmin={isAdmin}
-                  isFirst={i === 0}
-                  isLast={i === services.length - 1}
-                  pythonEndpoint={service.pythonEndpoint}
-                  pythonScript={service.pythonScript}
-                  isDragMode={isDragMode}
-                  isDraggingThis={draggingId === service.id}
-                  dragOverSide={dragOverId === service.id ? dragOverSide : null}
-                  onRemove={() => removeService(service.id)}
-                  onEdit={() => handleEdit(service)}
-                  onDragStart={() => handleDragStart(service.id)}
-                  onDragEnd={handleDragEnd}
-                  onDragOver={(side) => handleDragOver(service.id, side)}
-                  onDragLeave={handleDragLeave}
-                  onDrop={handleDrop}
-                />
-              ))}
-
-            {!loading && isAdmin && isDragMode && (
-              <AddServiceCard
-                index={services.length}
-                onClick={() => setDialogOpen(true)}
+        <div className="mx-auto w-full max-w-[1400px] px-4 sm:px-6 md:px-10 py-6 sm:py-10 md:py-16 flex-1 space-y-8 sm:space-y-12">
+          
+          {/* System Health */}
+          <section>
+            <div className="flex items-center gap-3 mb-4">
+              <motion.div
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: 1 }}
+                transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
+                className="h-[1px] w-12 bg-gradient-to-r from-primary/60 to-transparent origin-left"
               />
-            )}
-          </div>
+              <motion.p
+                initial={{ opacity: 0, x: -8 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="font-mono text-[11px] text-muted-foreground/50 uppercase tracking-[0.2em]"
+              >
+                System Health
+              </motion.p>
+            </div>
+            <SystemHealthCards />
+          </section>
+
+          {/* Services */}
+          <section>
+            <div className="flex items-center gap-3 mb-4">
+              <motion.div
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: 1 }}
+                transition={{ duration: 0.6, delay: 0.1, ease: [0.23, 1, 0.32, 1] }}
+                className="h-[1px] w-12 bg-gradient-to-r from-primary/60 to-transparent origin-left"
+              />
+              <motion.p
+                initial={{ opacity: 0, x: -8 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.15 }}
+                className="font-mono text-[11px] text-muted-foreground/50 uppercase tracking-[0.2em]"
+              >
+                Services
+              </motion.p>
+            </div>
+
+            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {loaded &&
+                services.map((service, i) => (
+                  <ServiceCard
+                    key={service.id}
+                    name={service.name}
+                    description={service.description}
+                    url={service.url}
+                    icon={getIconByName(service.iconName)}
+                    accentColor={service.accentColor}
+                    glowClass={service.glowClass}
+                    size={service.size}
+                    index={i}
+                    isAdmin={isAdmin}
+                    isFirst={i === 0}
+                    isLast={i === services.length - 1}
+                    pythonEndpoint={service.pythonEndpoint}
+                    pythonScript={service.pythonScript}
+                    isDragMode={isDragMode}
+                    isDraggingThis={draggingId === service.id}
+                    dragOverSide={dragOverId === service.id ? dragOverSide : null}
+                    onRemove={() => removeService(service.id)}
+                    onEdit={() => handleEdit(service)}
+                    onDragStart={() => handleDragStart(service.id)}
+                    onDragEnd={handleDragEnd}
+                    onDragOver={(side) => handleDragOver(service.id, side)}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                  />
+                ))}
+
+              {!loading && isAdmin && isDragMode && (
+                <AddServiceCard
+                  index={services.length}
+                  onClick={() => setDialogOpen(true)}
+                />
+              )}
+            </div>
+          </section>
+
+          {/* Activity & Quick Actions */}
+          <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <ActivityFeed />
+            </div>
+            <div>
+              <QuickActions isAdmin={isAdmin} />
+            </div>
+          </section>
         </div>
 
-        {/* Footer — bottom edge */}
+        {/* Footer */}
         <motion.footer
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
