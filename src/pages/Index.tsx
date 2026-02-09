@@ -30,7 +30,6 @@ const Index = () => {
     return (localStorage.getItem(LAYOUT_KEY) as "merged" | "separate") || "separate";
   });
 
-  // Drag state
   const [isDragMode, setIsDragMode] = useState(false);
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [dragOverId, setDragOverId] = useState<string | null>(null);
@@ -111,7 +110,7 @@ const Index = () => {
     handleDragEnd();
   }, [handleDragEnd]);
 
-  const gridClass = "grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 auto-rows-[minmax(140px,auto)]";
+  const gridClass = "grid gap-2.5 sm:gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 auto-rows-[minmax(100px,auto)]";
 
   const renderServiceCards = (startIndex = 0) =>
     loaded &&
@@ -156,19 +155,19 @@ const Index = () => {
       />
     ));
 
-  const sectionHeader = (label: string, delay = 0.1, color = "primary") => (
-    <div className="flex items-center gap-3 mb-6">
+  const sectionHeader = (label: string, delay = 0.1) => (
+    <div className="flex items-center gap-2.5 mb-3 sm:mb-4">
       <motion.div
         initial={{ scaleX: 0 }}
         animate={{ scaleX: 1 }}
         transition={{ duration: 0.6, delay, ease: [0.23, 1, 0.32, 1] }}
-        className={`h-[1px] w-12 bg-gradient-to-r from-${color}/60 to-transparent origin-left`}
+        className="h-[1px] w-8 bg-gradient-to-r from-primary/60 to-transparent origin-left"
       />
       <motion.p
         initial={{ opacity: 0, x: -8 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: delay + 0.05 }}
-        className="font-mono text-[11px] text-muted-foreground/50 uppercase tracking-[0.2em]"
+        className="font-mono text-[10px] text-muted-foreground/50 uppercase tracking-[0.2em]"
       >
         {label}
       </motion.p>
@@ -185,17 +184,17 @@ const Index = () => {
   const addWidgetButton = !loading && isAdmin && isDragMode && (
     <motion.button
       onClick={() => setWidgetDialogOpen(true)}
-      initial={{ opacity: 0, y: 20, scale: 0.95 }}
+      initial={{ opacity: 0, y: 12, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ duration: 0.35, delay: widgets.length * 0.07, ease: [0.16, 1, 0.3, 1] }}
-      whileHover={{ y: -4, scale: 1.02 }}
+      transition={{ duration: 0.3, delay: widgets.length * 0.05, ease: [0.16, 1, 0.3, 1] }}
+      whileHover={{ y: -2, scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
-      className="glass-card group relative flex flex-col items-center justify-center gap-3 rounded-xl p-6 transition-all duration-300 cursor-pointer min-h-[140px] border-dashed !border-2 !border-muted-foreground/20 hover:!border-accent/40"
+      className="glass-card group relative flex flex-col items-center justify-center gap-2 rounded-xl p-4 transition-all duration-300 cursor-pointer min-h-[100px] border-dashed !border-2 !border-muted-foreground/20 hover:!border-accent/40"
     >
-      <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-accent/10 text-accent group-hover:bg-accent/20 transition-colors duration-300">
-        <Plus className="h-6 w-6" />
+      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent/10 text-accent group-hover:bg-accent/20 transition-colors duration-300">
+        <Plus className="h-5 w-5" />
       </div>
-      <span className="font-mono text-sm text-muted-foreground group-hover:text-foreground transition-colors duration-300">
+      <span className="font-mono text-[11px] text-muted-foreground group-hover:text-foreground transition-colors duration-300">
         Add Widget
       </span>
     </motion.button>
@@ -210,38 +209,32 @@ const Index = () => {
         transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
         className="sticky top-0 z-20 backdrop-blur-xl bg-background/60 border-b border-border/50"
       >
-        <div className="mx-auto max-w-[1400px] px-4 sm:px-6 md:px-10 h-12 sm:h-14 flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-            <div className="h-2 w-2 rounded-full bg-primary shadow-[0_0_8px_2px_hsl(var(--primary)/0.4)] shrink-0" />
-            <span className="font-display text-base sm:text-lg font-semibold text-foreground tracking-tight">
+        <div className="mx-auto max-w-[1400px] px-3 sm:px-5 md:px-8 h-11 sm:h-12 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="h-1.5 w-1.5 rounded-full bg-primary shadow-[0_0_6px_2px_hsl(var(--primary)/0.4)] shrink-0" />
+            <span className="font-display text-sm sm:text-base font-semibold text-foreground tracking-tight">
               jambiya
             </span>
             <span className="text-muted-foreground/30 font-light hidden sm:inline">/</span>
-            <span className="font-mono text-[10px] sm:text-xs text-muted-foreground/60 uppercase tracking-widest hidden sm:inline">
+            <span className="font-mono text-[9px] sm:text-[10px] text-muted-foreground/60 uppercase tracking-widest hidden sm:inline">
               dashboard
             </span>
           </div>
 
-          <div className="flex items-center gap-2">
-            {/* Layout toggle */}
+          <div className="flex items-center gap-1.5">
             {!loading && isAdmin && (
               <motion.button
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.15 }}
                 onClick={toggleLayout}
-                className="flex items-center gap-1 px-2 py-1.5 rounded-lg text-[11px] font-mono uppercase tracking-wider bg-secondary/60 text-muted-foreground hover:text-foreground hover:bg-secondary border border-transparent transition-all duration-150 shrink-0"
-                title={layoutMode === "merged" ? "Switch to separate sections" : "Switch to merged grid"}
+                className="flex items-center gap-1 p-1.5 rounded-md text-[10px] font-mono bg-secondary/60 text-muted-foreground hover:text-foreground hover:bg-secondary border border-transparent transition-all duration-150 shrink-0"
+                title={layoutMode === "merged" ? "Separate sections" : "Merge grid"}
               >
-                {layoutMode === "merged" ? (
-                  <Rows3 className="h-3 w-3" />
-                ) : (
-                  <LayoutGrid className="h-3 w-3" />
-                )}
+                {layoutMode === "merged" ? <Rows3 className="h-3 w-3" /> : <LayoutGrid className="h-3 w-3" />}
               </motion.button>
             )}
 
-            {/* Reorder / Add toggle */}
             {!loading && isAdmin && (
               <motion.button
                 initial={{ opacity: 0 }}
@@ -253,7 +246,7 @@ const Index = () => {
                   setDragOverId(null);
                   setDragOverSide(null);
                 }}
-                className={`flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-mono uppercase tracking-wider transition-all duration-150 shrink-0 ${
+                className={`flex items-center gap-1 px-2 py-1.5 rounded-md text-[10px] sm:text-[11px] font-mono uppercase tracking-wider transition-all duration-150 shrink-0 ${
                   isDragMode
                     ? "bg-primary/20 text-primary border border-primary/30"
                     : "bg-secondary/60 text-muted-foreground hover:text-foreground hover:bg-secondary border border-transparent"
@@ -262,15 +255,12 @@ const Index = () => {
                 {isDragMode ? (
                   <>
                     <Check className="h-3 w-3" />
-                    Done
+                    <span className="hidden sm:inline">Done</span>
                   </>
                 ) : (
                   <>
                     <GripVertical className="h-3 w-3" />
-                    <span className="hidden sm:inline">Reorder</span>
-                    <span className="text-muted-foreground/40 hidden sm:inline">/</span>
                     <Plus className="h-3 w-3" />
-                    <span className="hidden sm:inline">Add</span>
                   </>
                 )}
               </motion.button>
@@ -281,12 +271,10 @@ const Index = () => {
 
       {/* Main content */}
       <main className="flex-1 flex flex-col">
-        <div className="mx-auto w-full max-w-[1400px] px-4 sm:px-6 md:px-10 py-6 sm:py-10 md:py-16 flex-1 space-y-8 sm:space-y-12">
-          {/* System health strip */}
+        <div className="mx-auto w-full max-w-[1400px] px-3 sm:px-5 md:px-8 py-4 sm:py-6 md:py-8 flex-1 space-y-5 sm:space-y-7">
           <SystemHealthStrip />
 
           {layoutMode === "merged" ? (
-            /* Merged: everything in one grid */
             <section>
               {sectionHeader("Dashboard")}
               <div className={gridClass}>
@@ -297,7 +285,6 @@ const Index = () => {
               </div>
             </section>
           ) : (
-            /* Separate sections */
             <>
               <section>
                 {sectionHeader("Services")}
@@ -309,7 +296,7 @@ const Index = () => {
 
               {(widgetsLoaded && widgets.length > 0) || (isAdmin && isDragMode) ? (
                 <section>
-                  {sectionHeader("Widgets", 0.2, "accent")}
+                  {sectionHeader("Widgets", 0.2)}
                   <div className={gridClass}>
                     {renderWidgetCards(0)}
                     {addWidgetButton}
@@ -320,14 +307,13 @@ const Index = () => {
           )}
         </div>
 
-        {/* Footer */}
         <motion.footer
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
-          className="py-8 text-center"
+          className="py-5 text-center"
         >
-          <p className="font-mono text-[10px] text-muted-foreground/30 tracking-widest uppercase">
+          <p className="font-mono text-[9px] text-muted-foreground/25 tracking-widest uppercase">
             *.jambiya.me
           </p>
         </motion.footer>
