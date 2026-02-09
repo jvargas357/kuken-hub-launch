@@ -142,7 +142,7 @@ const ServiceCard = ({
 
       {/* External link */}
       {!isInDragMode && (
-        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
+        <div className="absolute top-2.5 right-2.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
           <ExternalLink className="h-3 w-3 text-muted-foreground/40" />
         </div>
       )}
@@ -154,8 +154,8 @@ const ServiceCard = ({
         </div>
       )}
 
-      {/* Main content */}
-      <div className="flex flex-col justify-between w-full h-full min-h-[80px] relative z-[1]">
+      {/* Main content — compact vertical: icon then name, no stretching */}
+      <div className="flex flex-col gap-2 w-full relative z-[1]">
         {/* Icon */}
         <div className="relative w-fit">
           <div
@@ -163,20 +163,20 @@ const ServiceCard = ({
             style={{ backgroundColor: colorStyle || "hsl(var(--primary))" }}
           />
           <div
-            className="relative flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-lg transition-all duration-300 group-hover:scale-110"
+            className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all duration-300 group-hover:scale-110"
             style={{
               backgroundColor: colorStyle ? `hsl(var(--${accentColor}) / 0.12)` : "hsl(var(--primary) / 0.12)",
               color: colorStyle || "hsl(var(--primary))",
               border: `1px solid ${colorStyle ? `hsl(var(--${accentColor}) / 0.15)` : "hsl(var(--primary) / 0.15)"}`,
             }}
           >
-            <div className="scale-[0.85]">{icon}</div>
+            <div className="scale-75">{icon}</div>
           </div>
         </div>
 
         {/* Name + status */}
-        <div className="mt-auto pt-2">
-          <h3 className="font-display text-[13px] sm:text-[14px] font-semibold text-foreground truncate leading-tight">{name}</h3>
+        <div>
+          <h3 className="font-display text-[13px] font-semibold text-foreground truncate leading-tight">{name}</h3>
           <div className="flex items-center gap-1 mt-0.5">
             <span
               className="h-1 w-1 rounded-full shrink-0"
@@ -192,9 +192,9 @@ const ServiceCard = ({
     </>
   );
 
-  const innerClassName = `glass-card ${glowClass || ""} group relative flex flex-col items-start rounded-xl px-3.5 py-3 sm:px-4 sm:py-3.5 transition-all duration-200 ${
+  const innerClassName = `glass-card ${glowClass || ""} group relative flex flex-col items-start rounded-xl px-3 py-2.5 sm:px-3.5 sm:py-3 transition-all duration-200 ${
     isInDragMode ? "cursor-grab active:cursor-grabbing" : "cursor-pointer"
-  } hover:border-primary/30 w-full h-full min-h-[100px] overflow-hidden`;
+  } hover:border-primary/30 w-full h-full overflow-hidden`;
 
   return (
     <>
@@ -210,51 +210,29 @@ const ServiceCard = ({
         {/* Drop indicators */}
         <AnimatePresence>
           {dragOverSide === "before" && (
-            <motion.div
-              key="indicator-before"
-              initial={{ opacity: 0, scaleY: 0.6 }}
-              animate={{ opacity: 1, scaleY: 1 }}
-              exit={{ opacity: 0, scaleY: 0.6 }}
-              transition={{ duration: 0.15 }}
-              className="absolute -left-[5px] top-1 bottom-1 w-[2px] rounded-full bg-primary z-10 pointer-events-none shadow-[0_0_8px_2px_hsl(var(--primary)/0.5)]"
-            />
+            <motion.div key="indicator-before" initial={{ opacity: 0, scaleY: 0.6 }} animate={{ opacity: 1, scaleY: 1 }} exit={{ opacity: 0, scaleY: 0.6 }} transition={{ duration: 0.15 }}
+              className="absolute -left-[5px] top-1 bottom-1 w-[2px] rounded-full bg-primary z-10 pointer-events-none shadow-[0_0_8px_2px_hsl(var(--primary)/0.5)]" />
           )}
         </AnimatePresence>
         <AnimatePresence>
           {dragOverSide === "after" && (
-            <motion.div
-              key="indicator-after"
-              initial={{ opacity: 0, scaleY: 0.6 }}
-              animate={{ opacity: 1, scaleY: 1 }}
-              exit={{ opacity: 0, scaleY: 0.6 }}
-              transition={{ duration: 0.15 }}
-              className="absolute -right-[5px] top-1 bottom-1 w-[2px] rounded-full bg-primary z-10 pointer-events-none shadow-[0_0_8px_2px_hsl(var(--primary)/0.5)]"
-            />
+            <motion.div key="indicator-after" initial={{ opacity: 0, scaleY: 0.6 }} animate={{ opacity: 1, scaleY: 1 }} exit={{ opacity: 0, scaleY: 0.6 }} transition={{ duration: 0.15 }}
+              className="absolute -right-[5px] top-1 bottom-1 w-[2px] rounded-full bg-primary z-10 pointer-events-none shadow-[0_0_8px_2px_hsl(var(--primary)/0.5)]" />
           )}
         </AnimatePresence>
         <AnimatePresence>
           {dragOverSide && (
-            <motion.div
-              key="ghost-outline"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.12 }}
-              className="absolute inset-0 rounded-xl border-2 border-dashed border-primary/40 bg-primary/[0.06] z-[5] pointer-events-none"
-            />
+            <motion.div key="ghost-outline" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.12 }}
+              className="absolute inset-0 rounded-xl border-2 border-dashed border-primary/40 bg-primary/[0.06] z-[5] pointer-events-none" />
           )}
         </AnimatePresence>
 
         <motion.div
-          initial={{ opacity: 0, y: 12, scale: 0.95 }}
-          animate={{
-            opacity: isDraggingThis ? 0.35 : 1,
-            y: 0,
-            scale: isDraggingThis ? 0.95 : 1,
-          }}
-          transition={{ duration: 0.3, delay: index * 0.05, ease: [0.16, 1, 0.3, 1] }}
+          initial={{ opacity: 0, y: 8, scale: 0.97 }}
+          animate={{ opacity: isDraggingThis ? 0.35 : 1, y: 0, scale: isDraggingThis ? 0.95 : 1 }}
+          transition={{ duration: 0.25, delay: index * 0.04, ease: [0.16, 1, 0.3, 1] }}
           style={{ rotate: jellyRotate, scale: jellyScale }}
-          whileHover={isInDragMode ? undefined : { y: -3, scale: 1.015 }}
+          whileHover={isInDragMode ? undefined : { y: -2, scale: 1.01 }}
           whileTap={isInDragMode ? undefined : { scale: 0.98 }}
         >
           {isInDragMode ? (
@@ -271,18 +249,11 @@ const ServiceCard = ({
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Remove "{name}"?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will remove the service from your dashboard. You can always add it back later.
-            </AlertDialogDescription>
+            <AlertDialogDescription>This will remove the service from your dashboard.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => onRemove()}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Remove
-            </AlertDialogAction>
+            <AlertDialogAction onClick={() => onRemove()} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Remove</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
