@@ -166,6 +166,7 @@ const ServiceCard = ({
         </AnimatePresence>
 
         <motion.div
+          className="h-full"
           initial={{ opacity: 0, y: 8, scale: 0.97 }}
           animate={{ opacity: isDraggingThis ? 0.35 : 1, y: 0, scale: isDraggingThis ? 0.95 : 1 }}
           transition={{ duration: 0.25, delay: index * 0.04, ease: [0.16, 1, 0.3, 1] }}

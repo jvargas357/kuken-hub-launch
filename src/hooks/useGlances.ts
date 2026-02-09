@@ -13,26 +13,12 @@ export interface GlancesStats {
   network: { interface_name: string; rx: number; tx: number }[];
 }
 
-const MOCK_STATS: GlancesStats = {
-  cpu: { total: 23.4, user: 18.1, system: 5.3 },
-  mem: { percent: 61.2, used: 6_547_283_968, total: 10_695_442_432 },
-  fs: [
-    { device_name: "/dev/sda1", percent: 47.3, used: 203_456_789_012, size: 512_000_000_000, mnt_point: "/" },
-  ],
-  uptime: "14d 7h 32m",
-  hostname: "jambiya-srv",
-  load: { min1: 0.87, min5: 0.64, min15: 0.52 },
-  network: [
-    { interface_name: "eth0", rx: 1_245_184, tx: 523_264 },
-  ],
-};
-
 export function useGlances() {
   const [apiUrl, setApiUrl] = useState(() => localStorage.getItem(GLANCES_URL_KEY) || DEFAULT_URL);
   const [stats, setStats] = useState<GlancesStats | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isMock, setIsMock] = useState(false);
+  
 
   const updateApiUrl = useCallback((url: string) => {
     const trimmed = url.trim().replace(/\/+$/, "");
@@ -54,10 +40,8 @@ export function useGlances() {
 
       const allFailed = results.every((r) => r.status === "rejected");
       if (allFailed) {
-        // Fall back to mock data
-        setStats(MOCK_STATS);
-        setIsMock(true);
-        setError(null);
+        setStats(null);
+        setError("All endpoints unreachable");
         setLoading(false);
         return;
       }
@@ -95,13 +79,10 @@ export function useGlances() {
             }))
           : [],
       });
-      setIsMock(false);
       setError(null);
     } catch (err) {
-      // Network error — fall back to mock
-      setStats(MOCK_STATS);
-      setIsMock(true);
-      setError(null);
+      setStats(null);
+      setError("Network error");
     } finally {
       setLoading(false);
     }
@@ -114,5 +95,5 @@ export function useGlances() {
     return () => clearInterval(interval);
   }, [fetchStats]);
 
-  return { stats, error, loading, isMock, apiUrl, updateApiUrl, refresh: fetchStats };
+  return { stats, error, loading, apiUrl, updateApiUrl, refresh: fetchStats };
 }
