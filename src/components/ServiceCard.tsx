@@ -61,7 +61,14 @@ const ServiceCard = ({
 }: ServiceCardProps) => {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const colorStyle = accentColor ? `hsl(var(--${accentColor}))` : undefined;
-  const sizeClass = size === "2x1" ? "sm:col-span-2" : "";
+  const sizeClasses: Record<string, string> = {
+    "1x1": "",
+    "2x1": "sm:col-span-2",
+    "3x1": "sm:col-span-3",
+    "1x2": "sm:row-span-2",
+    "2x2": "sm:col-span-2 sm:row-span-2",
+  };
+  const sizeClass = sizeClasses[size] || "";
   const isInDragMode = isDragMode && isAdmin;
 
   // Jelly animation values
@@ -130,9 +137,9 @@ const ServiceCard = ({
         }}
       />
 
-      {/* Admin controls — bottom-right */}
-      {isAdmin && !isInDragMode && (
-        <div className="absolute bottom-2.5 right-3 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150 z-10">
+      {/* Admin controls — bottom-right, only in reorder/add mode */}
+      {isAdmin && isInDragMode && (
+        <div className="absolute bottom-2.5 right-3 flex items-center gap-1 z-10">
           <button
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); onEdit(); }}
             className="h-6 w-6 flex items-center justify-center rounded-md bg-secondary/80 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
@@ -150,7 +157,7 @@ const ServiceCard = ({
         </div>
       )}
 
-      {/* External link — top-right */}
+      {/* External link — top-right, only when NOT in drag mode */}
       {!isInDragMode && (
         <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
           <ExternalLink className="h-3.5 w-3.5 text-muted-foreground/40" />

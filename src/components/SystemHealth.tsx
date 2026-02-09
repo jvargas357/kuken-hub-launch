@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Cpu, MemoryStick, Activity, Clock } from "lucide-react";
+import { Cpu, MemoryStick, Activity, Clock, HardDrive, ArrowDownUp } from "lucide-react";
 import { useGlances } from "@/hooks/useGlances";
 
 function formatBytes(bytes: number): string {
@@ -8,6 +8,12 @@ function formatBytes(bytes: number): string {
   const sizes = ["B", "KB", "MB", "GB", "TB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return `${(bytes / Math.pow(k, i)).toFixed(1)} ${sizes[i]}`;
+}
+
+function formatRate(bytesPerSec: number): string {
+  if (bytesPerSec < 1024) return `${bytesPerSec.toFixed(0)} B/s`;
+  if (bytesPerSec < 1024 * 1024) return `${(bytesPerSec / 1024).toFixed(1)} KB/s`;
+  return `${(bytesPerSec / (1024 * 1024)).toFixed(1)} MB/s`;
 }
 
 interface MiniGaugeProps {
@@ -84,8 +90,8 @@ const SystemHealthStrip = () => {
         animate={{ opacity: 1 }}
         className="glass-card rounded-xl p-4"
       >
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {[...Array(4)].map((_, i) => (
+        <div className="grid grid-cols-2 lg:grid-cols-6 gap-4">
+          {[...Array(6)].map((_, i) => (
             <div key={i} className="h-10 bg-secondary/40 rounded-lg animate-pulse" />
           ))}
         </div>
@@ -94,6 +100,11 @@ const SystemHealthStrip = () => {
   }
 
   if (!stats) return null;
+
+  // Aggregate network rates
+  const totalRx = stats.network.reduce((sum, n) => sum + n.rx, 0);
+  const totalTx = stats.network.reduce((sum, n) => sum + n.tx, 0);
+  const primaryDisk = stats.fs[0] ?? null;
 
   return (
     <motion.div
@@ -110,7 +121,7 @@ const SystemHealthStrip = () => {
           </span>
         </div>
       )}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-x-6 gap-y-4">
         {stats.cpu && (
           <MiniGauge
             value={stats.cpu.total}
@@ -137,6 +148,41 @@ const SystemHealthStrip = () => {
             detail={`${stats.load.min1.toFixed(2)}`}
             color="jellyfin"
           />
+        )}
+        {primaryDisk && (
+          <MiniGauge
+            value={primaryDisk.percent}
+            label="Disk"
+            icon={<HardDrive className="h-3.5 w-3.5" />}
+            detail={`${formatBytes(primaryDisk.used)}`}
+            color="nextcloud"
+          />
+        )}
+        {stats.network.length > 0 && (
+          <div className="flex items-center gap-3 min-w-0">
+            <div
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
+              style={{
+                backgroundColor: "hsl(var(--primary) / 0.1)",
+                color: "hsl(var(--primary))",
+              }}
+            >
+              <ArrowDownUp className="h-3.5 w-3.5" />
+            </div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-[10px] text-muted-foreground/60">
+                  ↓ {formatRate(totalRx)}
+                </span>
+                <span className="font-mono text-[10px] text-muted-foreground/60">
+                  ↑ {formatRate(totalTx)}
+                </span>
+              </div>
+              <span className="font-mono text-[9px] text-muted-foreground/50 uppercase tracking-widest">
+                Network
+              </span>
+            </div>
+          </div>
         )}
         {stats.uptime && (
           <div className="flex items-center gap-3 min-w-0">

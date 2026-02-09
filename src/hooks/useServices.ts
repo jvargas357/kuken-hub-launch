@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 
-export type ServiceSize = "1x1" | "2x1";
+export type ServiceSize = "1x1" | "2x1" | "3x1" | "1x2" | "2x2";
 
 export interface Service {
   id: string;

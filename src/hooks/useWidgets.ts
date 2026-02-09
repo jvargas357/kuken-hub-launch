@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 
 export type WidgetDisplayType = "key-value" | "list" | "log-feed" | "gauge";
-export type WidgetSize = "1x1" | "2x1" | "2x2";
+export type WidgetSize = "1x1" | "2x1" | "3x1" | "1x2" | "2x2";
 
 export interface Widget {
   id: string;
