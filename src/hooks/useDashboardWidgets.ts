@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 
-export type WidgetType = "system-health" | "activity-feed" | "quick-actions";
+export type WidgetType = "system-health" | "services" | "activity-feed" | "quick-actions";
 
 export interface WidgetConfig {
   id: string;
@@ -8,6 +8,8 @@ export interface WidgetConfig {
   title: string;
   collapsed: boolean;
   order: number;
+  /** Optional API endpoint to fetch data for this section */
+  endpoint?: string;
 }
 
 export interface WidgetRegistryEntry {
@@ -27,6 +29,13 @@ export const widgetRegistry: WidgetRegistryEntry[] = [
     defaultTitle: "System Health",
   },
   {
+    type: "services",
+    label: "Services",
+    description: "Self-hosted service links and management",
+    icon: "Globe",
+    defaultTitle: "Services",
+  },
+  {
     type: "activity-feed",
     label: "Activity & Alerts",
     description: "Recent activity log and security alerts",
@@ -42,12 +51,13 @@ export const widgetRegistry: WidgetRegistryEntry[] = [
   },
 ];
 
-const STORAGE_KEY = "dashboard-widgets-v1";
+const STORAGE_KEY = "dashboard-widgets-v2";
 
 const DEFAULT_WIDGETS: WidgetConfig[] = [
   { id: "w-health", type: "system-health", title: "System Health", collapsed: false, order: 0 },
-  { id: "w-activity", type: "activity-feed", title: "Activity & Alerts", collapsed: false, order: 1 },
-  { id: "w-actions", type: "quick-actions", title: "Quick Actions", collapsed: false, order: 2 },
+  { id: "w-services", type: "services", title: "Services", collapsed: false, order: 1 },
+  { id: "w-activity", type: "activity-feed", title: "Activity & Alerts", collapsed: false, order: 2 },
+  { id: "w-actions", type: "quick-actions", title: "Quick Actions", collapsed: false, order: 3 },
 ];
 
 export function useDashboardWidgets() {
@@ -108,12 +118,30 @@ export function useDashboardWidgets() {
     [widgets, persist]
   );
 
-  const updateWidgetTitle = useCallback(
-    (id: string, title: string) => {
-      persist(widgets.map((w) => (w.id === id ? { ...w, title } : w)));
+  const updateWidget = useCallback(
+    (id: string, updates: Partial<Pick<WidgetConfig, "title" | "endpoint">>) => {
+      persist(widgets.map((w) => (w.id === id ? { ...w, ...updates } : w)));
     },
     [widgets, persist]
   );
 
-  return { widgets, loaded, addWidget, removeWidget, toggleCollapse, updateWidgetTitle };
+  const reorderWidget = useCallback(
+    (dragId: string, targetId: string, side: "before" | "after") => {
+      const sorted = [...widgets].sort((a, b) => a.order - b.order);
+      const dragIdx = sorted.findIndex((w) => w.id === dragId);
+      const targetIdx = sorted.findIndex((w) => w.id === targetId);
+      if (dragIdx < 0 || targetIdx < 0 || dragIdx === targetIdx) return;
+
+      const [dragged] = sorted.splice(dragIdx, 1);
+      const newTargetIdx = sorted.findIndex((w) => w.id === targetId);
+      const insertIdx = side === "before" ? newTargetIdx : newTargetIdx + 1;
+      sorted.splice(insertIdx, 0, dragged);
+
+      const reordered = sorted.map((w, i) => ({ ...w, order: i }));
+      persist(reordered);
+    },
+    [widgets, persist]
+  );
+
+  return { widgets, loaded, addWidget, removeWidget, toggleCollapse, updateWidget, reorderWidget };
 }
