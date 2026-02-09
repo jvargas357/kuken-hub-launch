@@ -1,4 +1,4 @@
-import { Activity, Bell, Zap } from "lucide-react";
+import { Activity, Bell, Zap, Globe } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -13,6 +13,7 @@ const iconMap: Record<string, React.ReactNode> = {
   Activity: <Activity className="h-5 w-5" />,
   Bell: <Bell className="h-5 w-5" />,
   Zap: <Zap className="h-5 w-5" />,
+  Globe: <Globe className="h-5 w-5" />,
 };
 
 interface AddWidgetDialogProps {
