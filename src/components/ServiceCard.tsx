@@ -12,7 +12,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import PythonOutput from "@/components/PythonOutput";
 import type { ServiceSize } from "@/hooks/useServices";
 
 interface ServiceCardProps {
@@ -27,8 +26,6 @@ interface ServiceCardProps {
   isAdmin: boolean;
   isFirst?: boolean;
   isLast?: boolean;
-  pythonEndpoint?: string;
-  pythonScript?: string;
   isDragMode?: boolean;
   isDraggingThis?: boolean;
   dragOverSide?: "before" | "after" | null;
@@ -51,8 +48,6 @@ const ServiceCard = ({
   size,
   index,
   isAdmin,
-  pythonEndpoint,
-  pythonScript,
   isDragMode,
   isDraggingThis,
   dragOverSide,
@@ -65,7 +60,6 @@ const ServiceCard = ({
   onDrop,
 }: ServiceCardProps) => {
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const hasPython = !!(pythonEndpoint && pythonScript);
   const colorStyle = accentColor ? `hsl(var(--${accentColor}))` : undefined;
   const sizeClass = size === "2x1" ? "sm:col-span-2" : "";
   const isInDragMode = isDragMode && isAdmin;
@@ -208,11 +202,6 @@ const ServiceCard = ({
         </div>
       </div>
 
-      {hasPython && !isInDragMode && (
-        <div className="mt-3 w-full">
-          <PythonOutput endpoint={pythonEndpoint!} script={pythonScript!} />
-        </div>
-      )}
     </>
   );
 
