@@ -18,8 +18,7 @@ const LAYOUT_KEY = "dashboard-layout-mode";
 
 const Index = () => {
   const { isAdmin, loading } = useAutheliaUser();
-  const { services, loaded, addService, updateService, removeService, reorderService } =
-    useServices();
+  const { services, loaded, addService, updateService, removeService, reorderService } = useServices();
   const { widgets, loaded: widgetsLoaded, addWidget, updateWidget, removeWidget, reorderWidget } = useWidgets();
 
   const [serviceDialogOpen, setServiceDialogOpen] = useState(false);
@@ -30,7 +29,6 @@ const Index = () => {
     return (localStorage.getItem(LAYOUT_KEY) as "merged" | "separate") || "separate";
   });
 
-  // Drag state — shared for services and widgets
   const [isDragMode, setIsDragMode] = useState(false);
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [draggingType, setDraggingType] = useState<"service" | "widget" | null>(null);
@@ -56,17 +54,12 @@ const Index = () => {
     setEditingWidget(null);
   };
 
-  // Generic drag handlers
   const handleDragStart = useCallback((id: string, type: "service" | "widget") => {
-    setDraggingId(id);
-    setDraggingType(type);
+    setDraggingId(id); setDraggingType(type);
   }, []);
 
   const clearDrag = useCallback(() => {
-    setDraggingId(null);
-    setDraggingType(null);
-    setDragOverId(null);
-    setDragOverSide(null);
+    setDraggingId(null); setDraggingType(null); setDragOverId(null); setDragOverSide(null);
   }, []);
 
   const handleDragEnd = useCallback(() => {
@@ -79,21 +72,21 @@ const Index = () => {
 
   const handleDragOver = useCallback((targetId: string, side: "before" | "after") => {
     if (targetId === draggingId) return;
-    setDragOverId(targetId);
-    setDragOverSide(side);
+    setDragOverId(targetId); setDragOverSide(side);
   }, [draggingId]);
 
   const handleDragLeave = useCallback(() => { setDragOverId(null); setDragOverSide(null); }, []);
   const handleDrop = useCallback(() => { handleDragEnd(); }, [handleDragEnd]);
 
-  const gridClass = "grid gap-2 sm:gap-2.5 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5";
+  // Grid: fixed-width columns centered, 2col on mobile (fills width)
+  const gridClass = "grid gap-2 grid-cols-2 sm:[grid-template-columns:repeat(3,180px)] lg:[grid-template-columns:repeat(4,180px)] xl:[grid-template-columns:repeat(5,180px)] sm:[justify-content:center]";
 
   const renderServiceCards = (startIndex = 0) =>
     loaded && services.map((service, i) => (
       <ServiceCard
         key={service.id} name={service.name} description={service.description} url={service.url}
         icon={getIconByName(service.iconName)} accentColor={service.accentColor} glowClass={service.glowClass}
-        size={service.size} index={startIndex + i} isAdmin={isAdmin}
+        colSpan={service.colSpan} rowSpan={service.rowSpan} index={startIndex + i} isAdmin={isAdmin}
         isFirst={i === 0} isLast={i === services.length - 1}
         isDragMode={isDragMode} isDraggingThis={draggingId === service.id}
         dragOverSide={dragOverId === service.id ? dragOverSide : null}
@@ -147,7 +140,6 @@ const Index = () => {
 
   return (
     <div className="ambient-bg min-h-screen flex flex-col">
-      {/* Top bar */}
       <motion.header initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: [0.23, 1, 0.32, 1] }}
         className="sticky top-0 z-20 backdrop-blur-xl bg-background/60 border-b border-border/50">
@@ -180,7 +172,6 @@ const Index = () => {
         </div>
       </motion.header>
 
-      {/* Main content */}
       <main className="flex-1 flex flex-col">
         <div className="mx-auto w-full max-w-[1400px] px-3 sm:px-5 md:px-8 py-3 sm:py-4 md:py-6 flex-1 space-y-3 sm:space-y-4">
           <SystemHealthStrip />

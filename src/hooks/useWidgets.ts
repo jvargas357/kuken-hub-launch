@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 
 export type WidgetDisplayType = "key-value" | "list" | "log-feed" | "gauge";
-export type WidgetSize = "1x1" | "2x1" | "3x1" | "1x2" | "2x2";
 
 export interface Widget {
   id: string;
@@ -9,19 +8,18 @@ export interface Widget {
   displayType: WidgetDisplayType;
   apiUrl: string;
   jsonPath: string;
-  pollInterval: number; // seconds
-  size: WidgetSize;
+  pollInterval: number;
+  colSpan: number;
+  rowSpan: number;
   accentColor?: string;
   iconName: string;
   order: number;
-  // Mappings for list/key-value types
   fieldMappings?: {
     titleField?: string;
     subtitleField?: string;
     labelField?: string;
     valueField?: string;
   };
-  // Gauge-specific
   gaugeMax?: number;
   gaugeLabel?: string;
   gaugeValueField?: string;
@@ -30,62 +28,12 @@ export interface Widget {
 const STORAGE_KEY = "homelab-widgets-v1";
 
 const MOCK_WIDGETS: Widget[] = [
-  {
-    id: "mock-jellyfin",
-    title: "Recently Added",
-    displayType: "list",
-    apiUrl: "https://jellyfin.jambiya.me/Items/Latest",
-    jsonPath: "",
-    pollInterval: 30,
-    size: "2x1",
-    accentColor: "jellyfin",
-    iconName: "Film",
-    order: 0,
-    fieldMappings: { titleField: "Name", subtitleField: "ProductionYear" },
-  },
-  {
-    id: "mock-logs",
-    title: "System Logs",
-    displayType: "log-feed",
-    apiUrl: "https://api.jambiya.me/logs",
-    jsonPath: "entries",
-    pollInterval: 5,
-    size: "2x1",
-    accentColor: "primary",
-    iconName: "Terminal",
-    order: 1,
-  },
-  {
-    id: "mock-stats",
-    title: "Server Stats",
-    displayType: "key-value",
-    apiUrl: "https://api.jambiya.me/stats",
-    jsonPath: "",
-    pollInterval: 10,
-    size: "1x1",
-    accentColor: "nextcloud",
-    iconName: "BarChart3",
-    order: 2,
-    fieldMappings: { labelField: "label", valueField: "value" },
-  },
-  {
-    id: "mock-disk",
-    title: "Disk Usage",
-    displayType: "gauge",
-    apiUrl: "https://glances.jambiya.me/api/4/fs",
-    jsonPath: "0",
-    pollInterval: 15,
-    size: "1x1",
-    accentColor: "vaultwarden",
-    iconName: "HardDrive",
-    order: 3,
-    gaugeMax: 100,
-    gaugeLabel: "Used",
-    gaugeValueField: "percent",
-  },
+  { id: "mock-jellyfin", title: "Recently Added", displayType: "list", apiUrl: "https://jellyfin.jambiya.me/Items/Latest", jsonPath: "", pollInterval: 30, colSpan: 2, rowSpan: 1, accentColor: "jellyfin", iconName: "Film", order: 0, fieldMappings: { titleField: "Name", subtitleField: "ProductionYear" } },
+  { id: "mock-logs", title: "System Logs", displayType: "log-feed", apiUrl: "https://api.jambiya.me/logs", jsonPath: "entries", pollInterval: 5, colSpan: 2, rowSpan: 1, accentColor: "primary", iconName: "Terminal", order: 1 },
+  { id: "mock-stats", title: "Server Stats", displayType: "key-value", apiUrl: "https://api.jambiya.me/stats", jsonPath: "", pollInterval: 10, colSpan: 1, rowSpan: 1, accentColor: "nextcloud", iconName: "BarChart3", order: 2, fieldMappings: { labelField: "label", valueField: "value" } },
+  { id: "mock-disk", title: "Disk Usage", displayType: "gauge", apiUrl: "https://glances.jambiya.me/api/4/fs", jsonPath: "0", pollInterval: 15, colSpan: 1, rowSpan: 1, accentColor: "vaultwarden", iconName: "HardDrive", order: 3, gaugeMax: 100, gaugeLabel: "Used", gaugeValueField: "percent" },
 ];
 
-// Mock data for preview
 const MOCK_DATA: Record<string, any> = {
   "mock-jellyfin": [
     { Name: "Dune: Part Two", ProductionYear: "2024" },
@@ -113,6 +61,14 @@ const MOCK_DATA: Record<string, any> = {
   "mock-disk": [{ percent: 47.3 }],
 };
 
+function migrateWidget(w: any): Widget {
+  if (w.size && !w.colSpan) {
+    const [c, r] = w.size.split("x").map(Number);
+    return { ...w, colSpan: c || 1, rowSpan: r || 1, size: undefined };
+  }
+  return { ...w, colSpan: w.colSpan || 1, rowSpan: w.rowSpan || 1 };
+}
+
 function seedDefaults(): Widget[] {
   return MOCK_WIDGETS;
 }
@@ -125,7 +81,7 @@ export function useWidgets() {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
-        const parsed = JSON.parse(stored) as Widget[];
+        const parsed = JSON.parse(stored).map(migrateWidget) as Widget[];
         setWidgets(parsed.sort((a, b) => a.order - b.order));
       } else {
         const defaults = seedDefaults();
@@ -148,12 +104,7 @@ export function useWidgets() {
   const addWidget = useCallback(
     (widget: Omit<Widget, "id" | "order">) => {
       const maxOrder = widgets.length > 0 ? Math.max(...widgets.map((w) => w.order)) : -1;
-      const newWidget: Widget = {
-        ...widget,
-        id: crypto.randomUUID(),
-        order: maxOrder + 1,
-      };
-      persist([...widgets, newWidget]);
+      persist([...widgets, { ...widget, id: crypto.randomUUID(), order: maxOrder + 1 }]);
     },
     [widgets, persist]
   );
@@ -166,9 +117,7 @@ export function useWidgets() {
   );
 
   const removeWidget = useCallback(
-    (id: string) => {
-      persist(widgets.filter((w) => w.id !== id));
-    },
+    (id: string) => { persist(widgets.filter((w) => w.id !== id)); },
     [widgets, persist]
   );
 
@@ -190,7 +139,6 @@ export function useWidgets() {
   return { widgets, loaded, addWidget, updateWidget, removeWidget, reorderWidget };
 }
 
-// Extract data from API response using dot-notation path
 export function extractByPath(data: any, path: string): any {
   if (!path || path.trim() === "") return data;
   const keys = path.split(".");
@@ -202,7 +150,6 @@ export function extractByPath(data: any, path: string): any {
   return result;
 }
 
-// Get mock data for a widget
 export function getMockData(widgetId: string): any {
   return MOCK_DATA[widgetId] ?? null;
 }

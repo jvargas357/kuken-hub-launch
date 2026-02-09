@@ -1,21 +1,12 @@
 import { useState, useEffect } from "react";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
+  Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import {
   Monitor, Shield, Database, Mail, Download, HardDrive,
@@ -23,10 +14,9 @@ import {
   Container, Home, Music, Image, Film, ShieldCheck, Cloud, Code,
 } from "lucide-react";
 import type { ReactNode } from "react";
-import type { Service, ServiceSize } from "@/hooks/useServices";
+import type { Service } from "@/hooks/useServices";
 import NerdFontIcon, { NERD_FONT_GLYPHS } from "@/components/NerdFontIcon";
 
-/** Lucide icon options */
 const LUCIDE_ICON_OPTIONS: { value: string; label: string; icon: ReactNode }[] = [
   { value: "Film", label: "Film", icon: <Film className="h-4 w-4" /> },
   { value: "ShieldCheck", label: "Shield Check", icon: <ShieldCheck className="h-4 w-4" /> },
@@ -50,16 +40,12 @@ const LUCIDE_ICON_OPTIONS: { value: string; label: string; icon: ReactNode }[] =
   { value: "Code", label: "Code", icon: <Code className="h-4 w-4" /> },
 ];
 
-/** Nerd Font icon options */
 const NF_ICON_OPTIONS: { value: string; label: string; icon: ReactNode }[] = Object.entries(
   NERD_FONT_GLYPHS
 ).map(([key, { glyph, label }]) => ({
-  value: key,
-  label,
-  icon: <NerdFontIcon glyph={glyph} className="text-base" />,
+  value: key, label, icon: <NerdFontIcon glyph={glyph} className="text-base" />,
 }));
 
-/** Combined icon list (Lucide first, then Nerd Fonts) */
 export const ICON_OPTIONS = [...LUCIDE_ICON_OPTIONS, ...NF_ICON_OPTIONS];
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -69,12 +55,10 @@ const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
 };
 
 export function getIconByName(name: string): ReactNode {
-  // Nerd Font icon
   if (name.startsWith("nf-")) {
     const nf = NERD_FONT_GLYPHS[name];
     if (nf) return <NerdFontIcon glyph={nf.glyph} className="text-2xl" />;
   }
-  // Lucide icon
   const Icon = ICON_MAP[name];
   return Icon ? <Icon className="h-6 w-6" /> : <Globe className="h-6 w-6" />;
 }
@@ -86,20 +70,13 @@ interface ServiceDialogProps {
   editingService?: Service | null;
 }
 
-const SIZE_OPTIONS: { value: ServiceSize; label: string }[] = [
-  { value: "1x1", label: "Normal (1×1)" },
-  { value: "2x1", label: "Wide (2×1)" },
-  { value: "3x1", label: "Extra Wide (3×1)" },
-  { value: "1x2", label: "Tall (1×2)" },
-  { value: "2x2", label: "Large (2×2)" },
-];
-
 const ServiceDialog = ({ open, onOpenChange, onSubmit, editingService }: ServiceDialogProps) => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [url, setUrl] = useState("");
   const [iconName, setIconName] = useState("Globe");
-  const [size, setSize] = useState<ServiceSize>("1x1");
+  const [colSpan, setColSpan] = useState("1");
+  const [rowSpan, setRowSpan] = useState("1");
 
   useEffect(() => {
     if (editingService) {
@@ -107,13 +84,11 @@ const ServiceDialog = ({ open, onOpenChange, onSubmit, editingService }: Service
       setDescription(editingService.description);
       setUrl(editingService.url);
       setIconName(editingService.iconName);
-      setSize(editingService.size);
+      setColSpan(String(editingService.colSpan || 1));
+      setRowSpan(String(editingService.rowSpan || 1));
     } else {
-      setName("");
-      setDescription("");
-      setUrl("");
-      setIconName("Globe");
-      setSize("1x1");
+      setName(""); setDescription(""); setUrl(""); setIconName("Globe");
+      setColSpan("1"); setRowSpan("1");
     }
   }, [editingService, open]);
 
@@ -125,7 +100,8 @@ const ServiceDialog = ({ open, onOpenChange, onSubmit, editingService }: Service
       description: description.trim(),
       url: url.trim(),
       iconName,
-      size,
+      colSpan: Math.max(1, Math.min(5, parseInt(colSpan) || 1)),
+      rowSpan: Math.max(1, Math.min(5, parseInt(rowSpan) || 1)),
       accentColor: editingService?.accentColor,
       glowClass: editingService?.glowClass,
     });
@@ -142,49 +118,25 @@ const ServiceDialog = ({ open, onOpenChange, onSubmit, editingService }: Service
             {isEditing ? "Edit Service" : "Add Service"}
           </DialogTitle>
           <DialogDescription>
-            {isEditing
-              ? "Update this service's settings."
-              : "Add a new self-hosted service to your dashboard."}
+            {isEditing ? "Update this service's settings." : "Add a new self-hosted service to your dashboard."}
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="svc-name" className="text-muted-foreground">Name</Label>
-            <Input
-              id="svc-name"
-              placeholder="e.g. Portainer"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-              className="bg-secondary border-border"
-            />
+            <Input id="svc-name" placeholder="e.g. Portainer" value={name} onChange={(e) => setName(e.target.value)} required className="bg-secondary border-border" />
           </div>
-
           <div className="space-y-2">
             <Label htmlFor="svc-desc" className="text-muted-foreground">Description</Label>
-            <Input
-              id="svc-desc"
-              placeholder="e.g. Container management UI"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="bg-secondary border-border"
-            />
+            <Input id="svc-desc" placeholder="e.g. Container management UI" value={description} onChange={(e) => setDescription(e.target.value)} className="bg-secondary border-border" />
           </div>
-
           <div className="space-y-2">
             <Label htmlFor="svc-url" className="text-muted-foreground">URL</Label>
-            <Input
-              id="svc-url"
-              placeholder="https://portainer.jambiya.me"
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              required
-              className="bg-secondary border-border"
-            />
+            <Input id="svc-url" placeholder="https://portainer.jambiya.me" value={url} onChange={(e) => setUrl(e.target.value)} required className="bg-secondary border-border" />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-3 gap-3">
             <div className="space-y-2">
               <Label className="text-muted-foreground">Icon</Label>
               <Select value={iconName} onValueChange={setIconName}>
@@ -192,53 +144,33 @@ const ServiceDialog = ({ open, onOpenChange, onSubmit, editingService }: Service
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent className="bg-card border-border max-h-48">
-                  <SelectItem disabled value="__lucide_header" className="text-xs text-muted-foreground font-mono uppercase tracking-wider">
-                    Lucide Icons
-                  </SelectItem>
+                  <SelectItem disabled value="__lucide_header" className="text-xs text-muted-foreground font-mono uppercase tracking-wider">Lucide Icons</SelectItem>
                   {LUCIDE_ICON_OPTIONS.map((opt) => (
                     <SelectItem key={opt.value} value={opt.value}>
-                      <span className="flex items-center gap-2">
-                        {opt.icon}
-                        {opt.label}
-                      </span>
+                      <span className="flex items-center gap-2">{opt.icon}{opt.label}</span>
                     </SelectItem>
                   ))}
-                  <SelectItem disabled value="__nf_header" className="text-xs text-muted-foreground font-mono uppercase tracking-wider mt-2">
-                    Nerd Font Icons
-                  </SelectItem>
+                  <SelectItem disabled value="__nf_header" className="text-xs text-muted-foreground font-mono uppercase tracking-wider mt-2">Nerd Font Icons</SelectItem>
                   {NF_ICON_OPTIONS.map((opt) => (
                     <SelectItem key={opt.value} value={opt.value}>
-                      <span className="flex items-center gap-2">
-                        {opt.icon}
-                        {opt.label}
-                      </span>
+                      <span className="flex items-center gap-2">{opt.icon}{opt.label}</span>
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
-
             <div className="space-y-2">
-              <Label className="text-muted-foreground">Size</Label>
-              <Select value={size} onValueChange={(v) => setSize(v as ServiceSize)}>
-                <SelectTrigger className="bg-secondary border-border">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-card border-border">
-                  {SIZE_OPTIONS.map((opt) => (
-                    <SelectItem key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label className="text-muted-foreground">Columns</Label>
+              <Input type="number" min={1} max={5} value={colSpan} onChange={(e) => setColSpan(e.target.value)} className="bg-secondary border-border font-mono" />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-muted-foreground">Rows</Label>
+              <Input type="number" min={1} max={5} value={rowSpan} onChange={(e) => setRowSpan(e.target.value)} className="bg-secondary border-border font-mono" />
             </div>
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>
-              Cancel
-            </Button>
+            <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>
             <Button type="submit">{isEditing ? "Save" : "Add"}</Button>
           </DialogFooter>
         </form>
