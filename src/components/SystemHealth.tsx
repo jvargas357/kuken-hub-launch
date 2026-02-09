@@ -75,7 +75,7 @@ const MiniGauge = ({ value, label, icon, detail, color = "primary" }: MiniGaugeP
 };
 
 const SystemHealthStrip = () => {
-  const { stats, error, loading } = useGlances();
+  const { stats, loading, isMock } = useGlances();
 
   if (loading && !stats) {
     return (
@@ -93,20 +93,6 @@ const SystemHealthStrip = () => {
     );
   }
 
-  if (error) {
-    return (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="glass-card rounded-xl px-4 py-3 border-destructive/20"
-      >
-        <p className="text-[11px] text-muted-foreground/50 font-mono">
-          System health unavailable
-        </p>
-      </motion.div>
-    );
-  }
-
   if (!stats) return null;
 
   return (
@@ -116,6 +102,14 @@ const SystemHealthStrip = () => {
       transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
       className="glass-card rounded-xl px-5 py-4"
     >
+      {isMock && (
+        <div className="flex items-center gap-2 mb-3 pb-3 border-b border-border/30">
+          <div className="h-1.5 w-1.5 rounded-full bg-yellow-400/60" />
+          <span className="font-mono text-[9px] text-muted-foreground/40 uppercase tracking-widest">
+            Mock data — connect Glances to see live stats
+          </span>
+        </div>
+      )}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-4">
         {stats.cpu && (
           <MiniGauge
