@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence, useMotionValue, animate } from "framer-motion";
 import { X, Pencil, RefreshCw, GripVertical } from "lucide-react";
 import { getIconByName } from "@/components/ServiceDialog";
-import { extractByPath, getMockData } from "@/hooks/useWidgets";
+import { extractByPath } from "@/hooks/useWidgets";
 import type { Widget } from "@/hooks/useWidgets";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
@@ -137,14 +137,6 @@ const WidgetCard = ({ widget, index, isAdmin, isDragMode, isDraggingThis, dragOv
   };
 
   const fetchData = useCallback(async () => {
-    const mock = getMockData(widget.id);
-    if (mock) {
-      const extracted = extractByPath(mock, widget.jsonPath);
-      setData(extracted);
-      setLoading(false);
-      setError(false);
-      return;
-    }
     try {
       const res = await fetch(widget.apiUrl);
       if (!res.ok) throw new Error(`${res.status}`);
@@ -274,6 +266,7 @@ const WidgetCard = ({ widget, index, isAdmin, isDragMode, isDraggingThis, dragOv
         </AnimatePresence>
 
         <motion.div
+          className="h-full"
           initial={{ opacity: 0, y: 8, scale: 0.97 }}
           animate={{ opacity: isDraggingThis ? 0.35 : 1, y: 0, scale: isDraggingThis ? 0.95 : 1 }}
           transition={{ duration: 0.25, delay: index * 0.04, ease: [0.16, 1, 0.3, 1] }}

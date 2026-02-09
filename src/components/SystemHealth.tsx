@@ -43,7 +43,7 @@ const StatChip = ({ icon, label, value, color = "primary", critical, high }: Sta
 );
 
 const SystemHealthStrip = () => {
-  const { stats, loading, isMock } = useGlances();
+  const { stats, loading } = useGlances();
 
   if (loading && !stats) {
     return (
@@ -109,14 +109,6 @@ const SystemHealthStrip = () => {
       transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
       className="flex flex-col items-start gap-1.5"
     >
-      {isMock && (
-        <div className="flex items-center gap-1.5">
-          <div className="h-1 w-1 rounded-full bg-yellow-400/60" />
-          <span className="font-mono text-[8px] text-muted-foreground/30 uppercase tracking-widest">
-            Mock data
-          </span>
-        </div>
-      )}
       <div className="flex flex-wrap justify-start gap-1.5">
         {chips}
       </div>
