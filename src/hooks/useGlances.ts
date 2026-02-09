@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 
 const GLANCES_URL_KEY = "glances-api-url";
 const DEFAULT_URL = "https://glances.jambiya.me/api/4";
@@ -13,17 +13,32 @@ export interface GlancesStats {
   network: { interface_name: string; rx: number; tx: number }[];
 }
 
+const isLovablePreview = () =>
+  window.location.hostname.includes("lovableproject.com") ||
+  window.location.hostname.includes("lovable.app");
+
+const NORMAL_INTERVAL = 30000;
+const BACKOFF_INTERVAL = 60000;
+const PREVIEW_INTERVAL = 120000;
+
 export function useGlances() {
   const [apiUrl, setApiUrl] = useState(() => localStorage.getItem(GLANCES_URL_KEY) || DEFAULT_URL);
   const [stats, setStats] = useState<GlancesStats | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  
+
+  const failCountRef = useRef(0);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const updateApiUrl = useCallback((url: string) => {
     const trimmed = url.trim().replace(/\/+$/, "");
     setApiUrl(trimmed);
     localStorage.setItem(GLANCES_URL_KEY, trimmed);
+  }, []);
+
+  const getInterval = useCallback(() => {
+    if (isLovablePreview()) return PREVIEW_INTERVAL;
+    return failCountRef.current > 2 ? BACKOFF_INTERVAL : NORMAL_INTERVAL;
   }, []);
 
   const fetchStats = useCallback(async () => {
@@ -40,12 +55,14 @@ export function useGlances() {
 
       const allFailed = results.every((r) => r.status === "rejected");
       if (allFailed) {
+        failCountRef.current++;
         setStats(null);
         setError("All endpoints unreachable");
         setLoading(false);
         return;
       }
 
+      failCountRef.current = 0;
       const get = (i: number) => (results[i].status === "fulfilled" ? results[i].value : null);
 
       const cpuData = get(0);
@@ -81,6 +98,7 @@ export function useGlances() {
       });
       setError(null);
     } catch (err) {
+      failCountRef.current++;
       setStats(null);
       setError("Network error");
     } finally {
@@ -88,12 +106,38 @@ export function useGlances() {
     }
   }, [apiUrl]);
 
+  const startPolling = useCallback(() => {
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    intervalRef.current = setInterval(fetchStats, getInterval());
+  }, [fetchStats, getInterval]);
+
+  const stopPolling = useCallback(() => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+  }, []);
+
   useEffect(() => {
     setLoading(true);
     fetchStats();
-    const interval = setInterval(fetchStats, 5000);
-    return () => clearInterval(interval);
-  }, [fetchStats]);
+    startPolling();
+
+    const handleVisibility = () => {
+      if (document.hidden) {
+        stopPolling();
+      } else {
+        fetchStats();
+        startPolling();
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => {
+      stopPolling();
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
+  }, [fetchStats, startPolling, stopPolling]);
 
   return { stats, error, loading, apiUrl, updateApiUrl, refresh: fetchStats };
 }
