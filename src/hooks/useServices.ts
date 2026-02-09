@@ -1,7 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
 
-export type ServiceSize = "1x1" | "2x1" | "3x1" | "1x2" | "2x2";
-
 export interface Service {
   id: string;
   name: string;
@@ -10,50 +8,30 @@ export interface Service {
   iconName: string;
   accentColor?: string;
   glowClass?: string;
-  size: ServiceSize;
+  colSpan: number;
+  rowSpan: number;
   order: number;
 }
 
 const STORAGE_KEY = "homelab-services-v2";
 
 const DEFAULT_SERVICES: Omit<Service, "id">[] = [
-  {
-    name: "Jellyfin",
-    description: "Media server — movies, shows & music streaming",
-    url: "https://jellyfin.jambiya.me",
-    iconName: "Film",
-    accentColor: "jellyfin",
-    glowClass: "glow-jellyfin",
-    size: "1x1",
-    order: 0,
-  },
-  {
-    name: "Vaultwarden",
-    description: "Password manager — secure credential vault",
-    url: "https://vault.jambiya.me",
-    iconName: "ShieldCheck",
-    accentColor: "vaultwarden",
-    glowClass: "glow-vaultwarden",
-    size: "1x1",
-    order: 1,
-  },
-  {
-    name: "Nextcloud",
-    description: "Cloud storage — files, calendar & contacts",
-    url: "https://cloud.jambiya.me",
-    iconName: "Cloud",
-    accentColor: "nextcloud",
-    glowClass: "glow-nextcloud",
-    size: "1x1",
-    order: 2,
-  },
+  { name: "Jellyfin", description: "Media server", url: "https://jellyfin.jambiya.me", iconName: "Film", accentColor: "jellyfin", glowClass: "glow-jellyfin", colSpan: 1, rowSpan: 1, order: 0 },
+  { name: "Vaultwarden", description: "Password manager", url: "https://vault.jambiya.me", iconName: "ShieldCheck", accentColor: "vaultwarden", glowClass: "glow-vaultwarden", colSpan: 1, rowSpan: 1, order: 1 },
+  { name: "Nextcloud", description: "Cloud storage", url: "https://cloud.jambiya.me", iconName: "Cloud", accentColor: "nextcloud", glowClass: "glow-nextcloud", colSpan: 1, rowSpan: 1, order: 2 },
 ];
 
+function migrateService(s: any): Service {
+  // Migrate old "size" field to colSpan/rowSpan
+  if (s.size && !s.colSpan) {
+    const [c, r] = s.size.split("x").map(Number);
+    return { ...s, colSpan: c || 1, rowSpan: r || 1, size: undefined };
+  }
+  return { ...s, colSpan: s.colSpan || 1, rowSpan: s.rowSpan || 1 };
+}
+
 function seedDefaults(): Service[] {
-  return DEFAULT_SERVICES.map((s, i) => ({
-    ...s,
-    id: `default-${i}`,
-  }));
+  return DEFAULT_SERVICES.map((s, i) => ({ ...s, id: `default-${i}` }));
 }
 
 export function useServices() {
@@ -64,7 +42,7 @@ export function useServices() {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
-        const parsed = JSON.parse(stored) as Service[];
+        const parsed = JSON.parse(stored).map(migrateService) as Service[];
         setServices(parsed.sort((a, b) => a.order - b.order));
       } else {
         const defaults = seedDefaults();
@@ -87,12 +65,7 @@ export function useServices() {
   const addService = useCallback(
     (service: Omit<Service, "id" | "order">) => {
       const maxOrder = services.length > 0 ? Math.max(...services.map((s) => s.order)) : -1;
-      const newService: Service = {
-        ...service,
-        id: crypto.randomUUID(),
-        order: maxOrder + 1,
-      };
-      persist([...services, newService]);
+      persist([...services, { ...service, id: crypto.randomUUID(), order: maxOrder + 1 }]);
     },
     [services, persist]
   );
@@ -105,9 +78,7 @@ export function useServices() {
   );
 
   const removeService = useCallback(
-    (id: string) => {
-      persist(services.filter((s) => s.id !== id));
-    },
+    (id: string) => { persist(services.filter((s) => s.id !== id)); },
     [services, persist]
   );
 
@@ -116,14 +87,11 @@ export function useServices() {
       const sorted = [...services].sort((a, b) => a.order - b.order);
       const idx = sorted.findIndex((s) => s.id === id);
       if (idx < 0) return;
-
       const swapIdx = direction === "up" ? idx - 1 : idx + 1;
       if (swapIdx < 0 || swapIdx >= sorted.length) return;
-
       const tempOrder = sorted[idx].order;
       sorted[idx] = { ...sorted[idx], order: sorted[swapIdx].order };
       sorted[swapIdx] = { ...sorted[swapIdx], order: tempOrder };
-
       persist(sorted);
     },
     [services, persist]
@@ -135,18 +103,11 @@ export function useServices() {
       const dragIdx = sorted.findIndex((s) => s.id === dragId);
       const targetIdx = sorted.findIndex((s) => s.id === targetId);
       if (dragIdx < 0 || targetIdx < 0 || dragIdx === targetIdx) return;
-
-      // Remove dragged item
       const [dragged] = sorted.splice(dragIdx, 1);
-
-      // Find new target index after removal
       const newTargetIdx = sorted.findIndex((s) => s.id === targetId);
       const insertIdx = side === "before" ? newTargetIdx : newTargetIdx + 1;
       sorted.splice(insertIdx, 0, dragged);
-
-      // Re-assign orders
-      const reordered = sorted.map((s, i) => ({ ...s, order: i }));
-      persist(reordered);
+      persist(sorted.map((s, i) => ({ ...s, order: i })));
     },
     [services, persist]
   );

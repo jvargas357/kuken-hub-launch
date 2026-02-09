@@ -5,14 +5,8 @@ import { getIconByName } from "@/components/ServiceDialog";
 import { extractByPath, getMockData } from "@/hooks/useWidgets";
 import type { Widget } from "@/hooks/useWidgets";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
 interface WidgetCardProps {
@@ -93,13 +87,10 @@ const GaugeDisplay = ({ data, widget }: { data: any; widget: Widget }) => {
         <span className="text-muted-foreground/50 text-[10px] font-mono mb-0.5">{widget.gaugeLabel || "%"}</span>
       </div>
       <div className="h-1 w-full rounded-full bg-secondary/80 overflow-hidden">
-        <motion.div
-          initial={{ width: 0 }}
-          animate={{ width: `${percent}%` }}
+        <motion.div initial={{ width: 0 }} animate={{ width: `${percent}%` }}
           transition={{ duration: 0.8, ease: [0.23, 1, 0.32, 1] }}
           className={`h-full rounded-full ${isCritical ? "bg-destructive" : isHigh ? "bg-yellow-400" : ""}`}
-          style={!isCritical && !isHigh ? { backgroundColor: `hsl(var(--${widget.accentColor || "primary"}))` } : undefined}
-        />
+          style={!isCritical && !isHigh ? { backgroundColor: `hsl(var(--${widget.accentColor || "primary"}))` } : undefined} />
       </div>
     </div>
   );
@@ -112,14 +103,6 @@ const WidgetCard = ({ widget, index, isAdmin, isDragMode, isDraggingThis, dragOv
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   const colorStyle = widget.accentColor ? `hsl(var(--${widget.accentColor}))` : "hsl(var(--primary))";
-  const sizeClasses: Record<string, string> = {
-    "1x1": "",
-    "2x1": "col-span-2",
-    "3x1": "col-span-2 sm:col-span-3",
-    "1x2": "row-span-2",
-    "2x2": "col-span-2 row-span-2",
-  };
-  const sizeClass = sizeClasses[widget.size] || "";
   const isInDragMode = isDragMode && isAdmin;
 
   const jellyRotate = useMotionValue(0);
@@ -196,7 +179,8 @@ const WidgetCard = ({ widget, index, isAdmin, isDragMode, isDraggingThis, dragOv
   return (
     <>
       <div
-        className={`${sizeClass} relative`}
+        className="relative"
+        style={{ gridColumn: widget.colSpan > 1 ? `span ${widget.colSpan}` : undefined, gridRow: widget.rowSpan > 1 ? `span ${widget.rowSpan}` : undefined }}
         draggable={isInDragMode}
         onDragStart={isInDragMode ? handleNativeDragStart : undefined}
         onDragEnd={isInDragMode ? handleNativeDragEnd : undefined}
@@ -204,7 +188,6 @@ const WidgetCard = ({ widget, index, isAdmin, isDragMode, isDraggingThis, dragOv
         onDragLeave={isInDragMode ? handleNativeDragLeave : undefined}
         onDrop={isInDragMode ? handleNativeDrop : undefined}
       >
-        {/* Drop indicators */}
         <AnimatePresence>
           {dragOverSide === "before" && (
             <motion.div key="indicator-before" initial={{ opacity: 0, scaleY: 0.6 }} animate={{ opacity: 1, scaleY: 1 }} exit={{ opacity: 0, scaleY: 0.6 }} transition={{ duration: 0.15 }}
@@ -231,17 +214,11 @@ const WidgetCard = ({ widget, index, isAdmin, isDragMode, isDraggingThis, dragOv
           style={{ rotate: jellyRotate, scale: jellyScale }}
         >
           <div className={`glass-card group relative rounded-xl px-3 py-2.5 sm:px-3.5 sm:py-3 h-full overflow-hidden ${isInDragMode ? "cursor-grab active:cursor-grabbing" : ""}`}>
-            {/* Noise */}
             <div className="absolute inset-0 rounded-xl opacity-[0.03] pointer-events-none bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIj48ZmlsdGVyIGlkPSJuIj48ZmVUdXJidWxlbmNlIHR5cGU9ImZyYWN0YWxOb2lzZSIgYmFzZUZyZXF1ZW5jeT0iLjgiIG51bU9jdGF2ZXM9IjQiIHN0aXRjaFRpbGVzPSJzdGl0Y2giLz48L2ZpbHRlcj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWx0ZXI9InVybCgjbikiIG9wYWNpdHk9IjEiLz48L3N2Zz4=')]" />
-
-            {/* Accent orb */}
             <div className="absolute -top-6 -right-6 h-24 w-24 rounded-full opacity-[0.04] group-hover:opacity-[0.08] transition-opacity duration-700 pointer-events-none blur-2xl" style={{ backgroundColor: colorStyle }} />
-
-            {/* Bottom accent bar */}
             <div className="absolute bottom-0 left-3 right-3 h-[1px] rounded-full transition-opacity duration-500 opacity-0 group-hover:opacity-40"
               style={{ background: `linear-gradient(90deg, transparent, ${colorStyle}, transparent)` }} />
 
-            {/* Admin controls — only in reorder/add mode */}
             {isAdmin && isInDragMode && (
               <div className="absolute top-2 right-2 flex items-center gap-0.5 z-10">
                 <button onClick={(e) => { e.stopPropagation(); onEdit(); }}
@@ -255,14 +232,12 @@ const WidgetCard = ({ widget, index, isAdmin, isDragMode, isDraggingThis, dragOv
               </div>
             )}
 
-            {/* Drag handle */}
             {isInDragMode && (
               <div className="absolute bottom-2 right-2 text-muted-foreground/60 z-10">
                 <GripVertical className="h-3.5 w-3.5" />
               </div>
             )}
 
-            {/* Header */}
             <div className="flex items-center gap-2 mb-1.5 relative z-[1]">
               <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded"
                 style={{ backgroundColor: `hsl(var(--${widget.accentColor || "primary"}) / 0.12)`, color: colorStyle }}>

@@ -3,16 +3,9 @@ import { motion, AnimatePresence, useMotionValue, animate } from "framer-motion"
 import { ExternalLink, X, Pencil, GripVertical } from "lucide-react";
 import type { ReactNode } from "react";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import type { ServiceSize } from "@/hooks/useServices";
 
 interface ServiceCardProps {
   name: string;
@@ -21,7 +14,8 @@ interface ServiceCardProps {
   icon: ReactNode;
   accentColor?: string;
   glowClass?: string;
-  size: ServiceSize;
+  colSpan: number;
+  rowSpan: number;
   index: number;
   isAdmin: boolean;
   isFirst?: boolean;
@@ -39,35 +33,12 @@ interface ServiceCardProps {
 }
 
 const ServiceCard = ({
-  name,
-  url,
-  icon,
-  accentColor,
-  glowClass,
-  size,
-  index,
-  isAdmin,
-  isDragMode,
-  isDraggingThis,
-  dragOverSide,
-  onRemove,
-  onEdit,
-  onDragStart,
-  onDragEnd,
-  onDragOver,
-  onDragLeave,
-  onDrop,
+  name, url, icon, accentColor, glowClass, colSpan, rowSpan, index, isAdmin,
+  isDragMode, isDraggingThis, dragOverSide, onRemove, onEdit,
+  onDragStart, onDragEnd, onDragOver, onDragLeave, onDrop,
 }: ServiceCardProps) => {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const colorStyle = accentColor ? `hsl(var(--${accentColor}))` : undefined;
-  const sizeClasses: Record<string, string> = {
-    "1x1": "",
-    "2x1": "col-span-2",
-    "3x1": "col-span-2 sm:col-span-3",
-    "1x2": "row-span-2",
-    "2x2": "col-span-2 row-span-2",
-  };
-  const sizeClass = sizeClasses[size] || "";
   const isInDragMode = isDragMode && isAdmin;
 
   const jellyRotate = useMotionValue(0);
@@ -103,88 +74,55 @@ const ServiceCard = ({
 
   const cardContent = (
     <>
-      {/* Noise texture */}
       <div className="absolute inset-0 rounded-xl opacity-[0.03] pointer-events-none bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIj48ZmlsdGVyIGlkPSJuIj48ZmVUdXJidWxlbmNlIHR5cGU9ImZyYWN0YWxOb2lzZSIgYmFzZUZyZXF1ZW5jeT0iLjgiIG51bU9jdGF2ZXM9IjQiIHN0aXRjaFRpbGVzPSJzdGl0Y2giLz48L2ZpbHRlcj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWx0ZXI9InVybCgjbikiIG9wYWNpdHk9IjEiLz48L3N2Zz4=')]" />
+      <div className="absolute -top-6 -right-6 h-24 w-24 rounded-full opacity-[0.04] sm:opacity-0 group-hover:opacity-[0.08] transition-opacity duration-700 pointer-events-none blur-2xl"
+        style={{ backgroundColor: colorStyle || "hsl(var(--primary))" }} />
+      <div className="absolute bottom-0 left-3 right-3 h-[1px] rounded-full transition-opacity duration-500 opacity-20 sm:opacity-0 group-hover:opacity-40"
+        style={{ background: `linear-gradient(90deg, transparent, ${colorStyle || "hsl(var(--primary))"}, transparent)` }} />
 
-      {/* Accent orb */}
-      <div
-        className="absolute -top-6 -right-6 h-24 w-24 rounded-full opacity-[0.04] sm:opacity-0 group-hover:opacity-[0.08] transition-opacity duration-700 pointer-events-none blur-2xl"
-        style={{ backgroundColor: colorStyle || "hsl(var(--primary))" }}
-      />
-
-      {/* Bottom accent bar */}
-      <div
-        className="absolute bottom-0 left-3 right-3 h-[1px] rounded-full transition-opacity duration-500 opacity-20 sm:opacity-0 group-hover:opacity-40"
-        style={{
-          background: `linear-gradient(90deg, transparent, ${colorStyle || "hsl(var(--primary))"}, transparent)`,
-        }}
-      />
-
-      {/* Admin controls — only in reorder/add mode */}
       {isAdmin && isInDragMode && (
         <div className="absolute bottom-2 right-2 flex items-center gap-0.5 z-10">
-          <button
-            onClick={(e) => { e.preventDefault(); e.stopPropagation(); onEdit(); }}
-            className="h-5 w-5 flex items-center justify-center rounded bg-secondary/80 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
-            aria-label={`Edit ${name}`}
-          >
+          <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onEdit(); }}
+            className="h-5 w-5 flex items-center justify-center rounded bg-secondary/80 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors">
             <Pencil className="h-2.5 w-2.5" />
           </button>
-          <button
-            onClick={(e) => { e.preventDefault(); e.stopPropagation(); setConfirmOpen(true); }}
-            className="h-5 w-5 flex items-center justify-center rounded bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors"
-            aria-label={`Remove ${name}`}
-          >
+          <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); setConfirmOpen(true); }}
+            className="h-5 w-5 flex items-center justify-center rounded bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors">
             <X className="h-2.5 w-2.5" />
           </button>
         </div>
       )}
 
-      {/* External link */}
       {!isInDragMode && (
         <div className="absolute top-2.5 right-2.5 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
           <ExternalLink className="h-3 w-3 text-muted-foreground/40" />
         </div>
       )}
 
-      {/* Drag handle */}
       {isInDragMode && (
         <div className="absolute top-2 right-2 text-muted-foreground/60">
           <GripVertical className="h-3.5 w-3.5" />
         </div>
       )}
 
-      {/* Main content — compact vertical: icon then name, no stretching */}
       <div className="flex flex-col gap-2 w-full relative z-[1]">
-        {/* Icon */}
         <div className="relative w-fit">
-          <div
-            className="absolute inset-0 rounded-lg blur-lg opacity-0 group-hover:opacity-50 transition-opacity duration-500 scale-150"
-            style={{ backgroundColor: colorStyle || "hsl(var(--primary))" }}
-          />
-          <div
-            className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all duration-300 group-hover:scale-110"
+          <div className="absolute inset-0 rounded-lg blur-lg opacity-0 group-hover:opacity-50 transition-opacity duration-500 scale-150"
+            style={{ backgroundColor: colorStyle || "hsl(var(--primary))" }} />
+          <div className="relative flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-all duration-300 group-hover:scale-110"
             style={{
               backgroundColor: colorStyle ? `hsl(var(--${accentColor}) / 0.12)` : "hsl(var(--primary) / 0.12)",
               color: colorStyle || "hsl(var(--primary))",
               border: `1px solid ${colorStyle ? `hsl(var(--${accentColor}) / 0.15)` : "hsl(var(--primary) / 0.15)"}`,
-            }}
-          >
+            }}>
             <div className="scale-75">{icon}</div>
           </div>
         </div>
-
-        {/* Name + status */}
         <div>
           <h3 className="font-display text-[13px] font-semibold text-foreground truncate leading-tight">{name}</h3>
           <div className="flex items-center gap-1 mt-0.5">
-            <span
-              className="h-1 w-1 rounded-full shrink-0"
-              style={{
-                backgroundColor: colorStyle || "hsl(var(--primary))",
-                boxShadow: `0 0 4px 1px ${colorStyle || "hsl(var(--primary))"} / 0.5`,
-              }}
-            />
+            <span className="h-1 w-1 rounded-full shrink-0"
+              style={{ backgroundColor: colorStyle || "hsl(var(--primary))", boxShadow: `0 0 4px 1px ${colorStyle || "hsl(var(--primary))"} / 0.5` }} />
             <span className="text-[9px] text-muted-foreground/60 font-mono uppercase tracking-widest">Online</span>
           </div>
         </div>
@@ -199,7 +137,8 @@ const ServiceCard = ({
   return (
     <>
       <div
-        className={`${sizeClass} relative`}
+        className="relative"
+        style={{ gridColumn: colSpan > 1 ? `span ${colSpan}` : undefined, gridRow: rowSpan > 1 ? `span ${rowSpan}` : undefined }}
         draggable={isInDragMode}
         onDragStart={isInDragMode ? handleNativeDragStart : undefined}
         onDragEnd={isInDragMode ? handleNativeDragEnd : undefined}
@@ -207,7 +146,6 @@ const ServiceCard = ({
         onDragLeave={isInDragMode ? handleNativeDragLeave : undefined}
         onDrop={isInDragMode ? handleNativeDrop : undefined}
       >
-        {/* Drop indicators */}
         <AnimatePresence>
           {dragOverSide === "before" && (
             <motion.div key="indicator-before" initial={{ opacity: 0, scaleY: 0.6 }} animate={{ opacity: 1, scaleY: 1 }} exit={{ opacity: 0, scaleY: 0.6 }} transition={{ duration: 0.15 }}
@@ -238,9 +176,7 @@ const ServiceCard = ({
           {isInDragMode ? (
             <div className={innerClassName}>{cardContent}</div>
           ) : (
-            <a href={url} target="_blank" rel="noopener noreferrer" className={innerClassName}>
-              {cardContent}
-            </a>
+            <a href={url} target="_blank" rel="noopener noreferrer" className={innerClassName}>{cardContent}</a>
           )}
         </motion.div>
       </div>
