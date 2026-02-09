@@ -11,13 +11,19 @@ import type { Service } from "@/hooks/useServices";
 import SystemHealthCards from "@/components/dashboard/SystemHealthCards";
 import ActivityFeed from "@/components/dashboard/ActivityFeed";
 import QuickActions from "@/components/dashboard/QuickActions";
+import CollapsibleSection from "@/components/dashboard/CollapsibleSection";
+import AddWidgetDialog from "@/components/dashboard/AddWidgetDialog";
+import { useDashboardWidgets } from "@/hooks/useDashboardWidgets";
 
 const Index = () => {
   const { isAdmin, loading } = useAutheliaUser();
   const { services, loaded, addService, updateService, removeService, reorderService } =
     useServices();
+  const { widgets, loaded: widgetsLoaded, addWidget, removeWidget, toggleCollapse } =
+    useDashboardWidgets();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
+  const [addWidgetOpen, setAddWidgetOpen] = useState(false);
 
   // Drag state
   const [isDragMode, setIsDragMode] = useState(false);
@@ -98,37 +104,49 @@ const Index = () => {
           </div>
 
           {!loading && isAdmin && (
-            <motion.button
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.2 }}
-              onClick={() => {
-                setIsDragMode((prev) => !prev);
-                setDraggingId(null);
-                setDragOverId(null);
-                setDragOverSide(null);
-              }}
-              className={`flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-mono uppercase tracking-wider transition-all duration-150 shrink-0 ${
-                isDragMode
-                  ? "bg-primary/20 text-primary border border-primary/30"
-                  : "bg-secondary/60 text-muted-foreground hover:text-foreground hover:bg-secondary border border-transparent"
-              }`}
-            >
-              {isDragMode ? (
-                <>
-                  <Check className="h-3 w-3" />
-                  Done
-                </>
-              ) : (
-                <>
-                  <GripVertical className="h-3 w-3" />
-                  <span className="hidden sm:inline">Reorder</span>
-                  <span className="text-muted-foreground/40 hidden sm:inline">/</span>
-                  <Plus className="h-3 w-3" />
-                  <span className="hidden sm:inline">Add</span>
-                </>
-              )}
-            </motion.button>
+            <div className="flex items-center gap-2">
+              <motion.button
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.2 }}
+                onClick={() => setAddWidgetOpen(true)}
+                className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-mono uppercase tracking-wider bg-secondary/60 text-muted-foreground hover:text-foreground hover:bg-secondary border border-transparent transition-all duration-150 shrink-0"
+              >
+                <Plus className="h-3 w-3" />
+                <span className="hidden sm:inline">Widget</span>
+              </motion.button>
+              <motion.button
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.2 }}
+                onClick={() => {
+                  setIsDragMode((prev) => !prev);
+                  setDraggingId(null);
+                  setDragOverId(null);
+                  setDragOverSide(null);
+                }}
+                className={`flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-mono uppercase tracking-wider transition-all duration-150 shrink-0 ${
+                  isDragMode
+                    ? "bg-primary/20 text-primary border border-primary/30"
+                    : "bg-secondary/60 text-muted-foreground hover:text-foreground hover:bg-secondary border border-transparent"
+                }`}
+              >
+                {isDragMode ? (
+                  <>
+                    <Check className="h-3 w-3" />
+                    Done
+                  </>
+                ) : (
+                  <>
+                    <GripVertical className="h-3 w-3" />
+                    <span className="hidden sm:inline">Reorder</span>
+                    <span className="text-muted-foreground/40 hidden sm:inline">/</span>
+                    <Plus className="h-3 w-3" />
+                    <span className="hidden sm:inline">Add</span>
+                  </>
+                )}
+              </motion.button>
+            </div>
           )}
         </div>
       </motion.header>
@@ -137,25 +155,22 @@ const Index = () => {
       <main className="flex-1 flex flex-col">
         <div className="mx-auto w-full max-w-[1400px] px-4 sm:px-6 md:px-10 py-6 sm:py-10 md:py-16 flex-1 space-y-8 sm:space-y-12">
           
-          {/* System Health */}
-          <section>
-            <div className="flex items-center gap-3 mb-4">
-              <motion.div
-                initial={{ scaleX: 0 }}
-                animate={{ scaleX: 1 }}
-                transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
-                className="h-[1px] w-12 bg-gradient-to-r from-primary/60 to-transparent origin-left"
-              />
-              <motion.p
-                initial={{ opacity: 0, x: -8 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="font-mono text-[11px] text-muted-foreground/50 uppercase tracking-[0.2em]"
+          {/* Dynamic widget sections */}
+          {widgetsLoaded &&
+            widgets.map((widget) => (
+              <CollapsibleSection
+                key={widget.id}
+                title={widget.title}
+                collapsed={widget.collapsed}
+                onToggle={() => toggleCollapse(widget.id)}
+                onRemove={() => removeWidget(widget.id)}
+                isAdmin={isAdmin}
               >
-                System Health
-              </motion.p>
-            </div>
-            <SystemHealthCards />
-          </section>
+                {widget.type === "system-health" && <SystemHealthCards />}
+                {widget.type === "activity-feed" && <ActivityFeed />}
+                {widget.type === "quick-actions" && <QuickActions isAdmin={isAdmin} />}
+              </CollapsibleSection>
+            ))}
 
           {/* Services */}
           <section>
@@ -192,8 +207,6 @@ const Index = () => {
                     isAdmin={isAdmin}
                     isFirst={i === 0}
                     isLast={i === services.length - 1}
-                    pythonEndpoint={service.pythonEndpoint}
-                    pythonScript={service.pythonScript}
                     isDragMode={isDragMode}
                     isDraggingThis={draggingId === service.id}
                     dragOverSide={dragOverId === service.id ? dragOverSide : null}
@@ -213,16 +226,6 @@ const Index = () => {
                   onClick={() => setDialogOpen(true)}
                 />
               )}
-            </div>
-          </section>
-
-          {/* Activity & Quick Actions */}
-          <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2">
-              <ActivityFeed />
-            </div>
-            <div>
-              <QuickActions isAdmin={isAdmin} />
             </div>
           </section>
         </div>
@@ -245,6 +248,13 @@ const Index = () => {
         onOpenChange={handleDialogClose}
         onSubmit={handleSubmit}
         editingService={editingService}
+      />
+
+      <AddWidgetDialog
+        open={addWidgetOpen}
+        onOpenChange={setAddWidgetOpen}
+        onAdd={addWidget}
+        currentWidgets={widgets}
       />
     </div>
   );
