@@ -30,6 +30,8 @@ const DISPLAY_TYPE_OPTIONS: { value: WidgetDisplayType; label: string; desc: str
 const SIZE_OPTIONS: { value: WidgetSize; label: string }[] = [
   { value: "1x1", label: "Normal (1×1)" },
   { value: "2x1", label: "Wide (2×1)" },
+  { value: "3x1", label: "Extra Wide (3×1)" },
+  { value: "1x2", label: "Tall (1×2)" },
   { value: "2x2", label: "Large (2×2)" },
 ];
 

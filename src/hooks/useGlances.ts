@@ -16,11 +16,15 @@ export interface GlancesStats {
 const MOCK_STATS: GlancesStats = {
   cpu: { total: 23.4, user: 18.1, system: 5.3 },
   mem: { percent: 61.2, used: 6_547_283_968, total: 10_695_442_432 },
-  fs: [],
+  fs: [
+    { device_name: "/dev/sda1", percent: 47.3, used: 203_456_789_012, size: 512_000_000_000, mnt_point: "/" },
+  ],
   uptime: "14d 7h 32m",
   hostname: "jambiya-srv",
   load: { min1: 0.87, min5: 0.64, min15: 0.52 },
-  network: [],
+  network: [
+    { interface_name: "eth0", rx: 1_245_184, tx: 523_264 },
+  ],
 };
 
 export function useGlances() {

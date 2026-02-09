@@ -141,12 +141,14 @@ const WidgetCard = ({ widget, index, isAdmin, isDragMode, onRemove, onEdit }: Wi
 
   const colorStyle = widget.accentColor ? `hsl(var(--${widget.accentColor}))` : "hsl(var(--primary))";
 
-  const sizeClass =
-    widget.size === "2x1"
-      ? "sm:col-span-2"
-      : widget.size === "2x2"
-      ? "sm:col-span-2 sm:row-span-2"
-      : "";
+  const sizeClasses: Record<string, string> = {
+    "1x1": "",
+    "2x1": "sm:col-span-2",
+    "3x1": "sm:col-span-3",
+    "1x2": "sm:row-span-2",
+    "2x2": "sm:col-span-2 sm:row-span-2",
+  };
+  const sizeClass = sizeClasses[widget.size] || "";
 
   const fetchData = useCallback(async () => {
     // Check for mock data first
@@ -231,9 +233,9 @@ const WidgetCard = ({ widget, index, isAdmin, isDragMode, onRemove, onEdit }: Wi
               }}
             />
 
-            {/* Admin controls */}
-            {isAdmin && !isDragMode && (
-              <div className="absolute top-3 right-3 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-150 z-10">
+            {/* Admin controls — only in reorder/add mode */}
+            {isAdmin && isDragMode && (
+              <div className="absolute top-3 right-3 flex items-center gap-1 z-10">
                 <button
                   onClick={onEdit}
                   className="h-6 w-6 flex items-center justify-center rounded-md bg-secondary/80 text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
