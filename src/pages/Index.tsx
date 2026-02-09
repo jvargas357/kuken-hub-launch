@@ -6,16 +6,24 @@ import AddServiceCard from "@/components/AddServiceCard";
 import ServiceDialog from "@/components/ServiceDialog";
 import { getIconByName } from "@/components/ServiceDialog";
 import SystemHealthStrip from "@/components/SystemHealth";
+import WidgetCard from "@/components/WidgetCard";
+import WidgetDialog from "@/components/WidgetDialog";
 import { useAutheliaUser } from "@/hooks/useAutheliaUser";
 import { useServices } from "@/hooks/useServices";
+import { useWidgets } from "@/hooks/useWidgets";
 import type { Service } from "@/hooks/useServices";
+import type { Widget } from "@/hooks/useWidgets";
 
 const Index = () => {
   const { isAdmin, loading } = useAutheliaUser();
   const { services, loaded, addService, updateService, removeService, reorderService } =
     useServices();
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const { widgets, loaded: widgetsLoaded, addWidget, updateWidget, removeWidget } = useWidgets();
+
+  const [serviceDialogOpen, setServiceDialogOpen] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
+  const [widgetDialogOpen, setWidgetDialogOpen] = useState(false);
+  const [editingWidget, setEditingWidget] = useState<Widget | null>(null);
 
   // Drag state
   const [isDragMode, setIsDragMode] = useState(false);
@@ -23,23 +31,42 @@ const Index = () => {
   const [dragOverId, setDragOverId] = useState<string | null>(null);
   const [dragOverSide, setDragOverSide] = useState<"before" | "after" | null>(null);
 
-  const handleEdit = (service: Service) => {
+  const handleEditService = (service: Service) => {
     setEditingService(service);
-    setDialogOpen(true);
+    setServiceDialogOpen(true);
   };
 
-  const handleDialogClose = (open: boolean) => {
-    setDialogOpen(open);
+  const handleServiceDialogClose = (open: boolean) => {
+    setServiceDialogOpen(open);
     if (!open) setEditingService(null);
   };
 
-  const handleSubmit = (data: Omit<Service, "id" | "order">) => {
+  const handleServiceSubmit = (data: Omit<Service, "id" | "order">) => {
     if (editingService) {
       updateService(editingService.id, data);
     } else {
       addService(data);
     }
     setEditingService(null);
+  };
+
+  const handleEditWidget = (widget: Widget) => {
+    setEditingWidget(widget);
+    setWidgetDialogOpen(true);
+  };
+
+  const handleWidgetDialogClose = (open: boolean) => {
+    setWidgetDialogOpen(open);
+    if (!open) setEditingWidget(null);
+  };
+
+  const handleWidgetSubmit = (data: Omit<Widget, "id" | "order">) => {
+    if (editingWidget) {
+      updateWidget(editingWidget.id, data);
+    } else {
+      addWidget(data);
+    }
+    setEditingWidget(null);
   };
 
   const handleDragStart = useCallback((id: string) => {
@@ -138,7 +165,7 @@ const Index = () => {
           <SystemHealthStrip />
 
           {/* Services section */}
-          <div>
+          <section>
             <div className="flex items-center gap-3 mb-6">
               <motion.div
                 initial={{ scaleX: 0 }}
@@ -176,7 +203,7 @@ const Index = () => {
                     isDraggingThis={draggingId === service.id}
                     dragOverSide={dragOverId === service.id ? dragOverSide : null}
                     onRemove={() => removeService(service.id)}
-                    onEdit={() => handleEdit(service)}
+                    onEdit={() => handleEditService(service)}
                     onDragStart={() => handleDragStart(service.id)}
                     onDragEnd={handleDragEnd}
                     onDragOver={(side) => handleDragOver(service.id, side)}
@@ -188,11 +215,67 @@ const Index = () => {
               {!loading && isAdmin && isDragMode && (
                 <AddServiceCard
                   index={services.length}
-                  onClick={() => setDialogOpen(true)}
+                  onClick={() => setServiceDialogOpen(true)}
                 />
               )}
             </div>
-          </div>
+          </section>
+
+          {/* Widgets section */}
+          {(widgetsLoaded && widgets.length > 0) || (isAdmin && isDragMode) ? (
+            <section>
+              <div className="flex items-center gap-3 mb-6">
+                <motion.div
+                  initial={{ scaleX: 0 }}
+                  animate={{ scaleX: 1 }}
+                  transition={{ duration: 0.6, delay: 0.2, ease: [0.23, 1, 0.32, 1] }}
+                  className="h-[1px] w-12 bg-gradient-to-r from-accent/60 to-transparent origin-left"
+                />
+                <motion.p
+                  initial={{ opacity: 0, x: -8 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.25 }}
+                  className="font-mono text-[11px] text-muted-foreground/50 uppercase tracking-[0.2em]"
+                >
+                  Widgets
+                </motion.p>
+              </div>
+
+              <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {widgetsLoaded &&
+                  widgets.map((widget, i) => (
+                    <WidgetCard
+                      key={widget.id}
+                      widget={widget}
+                      index={i}
+                      isAdmin={isAdmin}
+                      isDragMode={isDragMode}
+                      onRemove={() => removeWidget(widget.id)}
+                      onEdit={() => handleEditWidget(widget)}
+                    />
+                  ))}
+
+                {!loading && isAdmin && isDragMode && (
+                  <motion.button
+                    onClick={() => setWidgetDialogOpen(true)}
+                    initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    transition={{ duration: 0.35, delay: widgets.length * 0.07, ease: [0.16, 1, 0.3, 1] }}
+                    whileHover={{ y: -4, scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="glass-card group relative flex flex-col items-center justify-center gap-3 rounded-xl p-6 transition-all duration-300 cursor-pointer min-h-[140px] border-dashed !border-2 !border-muted-foreground/20 hover:!border-accent/40"
+                  >
+                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-accent/10 text-accent group-hover:bg-accent/20 transition-colors duration-300">
+                      <Plus className="h-6 w-6" />
+                    </div>
+                    <span className="font-mono text-sm text-muted-foreground group-hover:text-foreground transition-colors duration-300">
+                      Add Widget
+                    </span>
+                  </motion.button>
+                )}
+              </div>
+            </section>
+          ) : null}
         </div>
 
         {/* Footer */}
@@ -209,10 +292,17 @@ const Index = () => {
       </main>
 
       <ServiceDialog
-        open={dialogOpen}
-        onOpenChange={handleDialogClose}
-        onSubmit={handleSubmit}
+        open={serviceDialogOpen}
+        onOpenChange={handleServiceDialogClose}
+        onSubmit={handleServiceSubmit}
         editingService={editingService}
+      />
+
+      <WidgetDialog
+        open={widgetDialogOpen}
+        onOpenChange={handleWidgetDialogClose}
+        onSubmit={handleWidgetSubmit}
+        editingWidget={editingWidget}
       />
     </div>
   );
